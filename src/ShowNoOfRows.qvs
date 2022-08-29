@@ -1,0 +1,36 @@
+/*
+	Shows nubmer of rows in the table
+
+    Parameters:
+     - @pShowNoOfRows_TableNames - list of Qlik table names delimited with comma
+	 - @pShowNoOfRows_Comment - text of optional comment
+
+	Usage sample:
+		Call ShowNoOfRows('tmpData');
+*/
+
+Sub ShowNoOfRows(pShowNoOfRows_TableNames, pShowNoOfRows_Comment)
+	// Space sign for Trace
+	if Len('$(pShowNoOfRows_TableNames)') > 0 then
+		pShowNoOfRows_TableNames = '''' & Replace(pShowNoOfRows_TableNames, ',', ''',''') & '''';
+		for each pShowNoOfRows_TableName in $(pShowNoOfRows_TableNames)
+			pShowNoOfRows_TableName = Trim(pShowNoOfRows_TableName);
+			if TableNumber('$(pShowNoOfRows_TableName)') >=0 then
+				Let pShowNoOfRows_NoOfRows = NoOfRows('$(pShowNoOfRows_TableName)');
+				If (Len(pShowNoOfRows_Comment) > 0) then
+					pShowNoOfRows_Comment = ' (' & pShowNoOfRows_Comment & ')';
+				End If
+				Trace [ShowNoOfRows]: $(pShowNoOfRows_NoOfRows) rows in [$(pShowNoOfRows_TableName)]$(pShowNoOfRows_Comment);
+			Else
+				Trace [ShowNoOfRows]: NO TABLE [$(pShowNoOfRows_TableName)];
+			End If
+		next pShowNoOfRows_TableName
+	Else
+		Trace [ShowNoOfRows]: NO SUCH TABLE(S);
+	End If
+
+	pShowNoOfRows_NoOfRows=;
+	pShowNoOfRows_TableNames=;
+    pShowNoOfRows_TableName=;
+	pShowNoOfRows_Comment=;
+End Sub;

@@ -1,0 +1,175 @@
+/*******************************************************************************
+	Data profiling procedure calculated data quality measures and KPIs
+
+    Version: 0.2
+    Author: Maksim Senin
+    Date created: 2022-04-27
+    Date modified: 2022-06-30
+    Desription:
+	Data Profiling logic, universal for any data model.
+    Each measure is calculated for each field individually.
+
+	Usage sample:
+		Call CreateDataProfiling;
+--------------------------------------------------------------------------------
+    Version: 0.2
+    Author: Maksim Senin
+    Date modified: 2022-06-30
+    Changes:
+    - Added KPI formulas logic
+    - Added the following measures and KPIs:
+        Min/Max number values
+		No. of key fields
+        No. of filled fields
+        No, of tables
+        Mode()
+        Median()
+        Avg()
+        No. of 100% filled rows
+        Absolute and Percentage values
+        Whitespace Values
+        Zero values
+        EPV (Expected Population Value) data quality index
+        Whitespaces in the end
+--------------------------------------------------------------------------------
+    Version: 0.1
+    Author: Maksim Senin
+    Date modified: 2022-06-30
+    Changes:
+    - Initial version
+*******************************************************************************/
+
+Sub CreateDataProfiling
+	// UI variables for data profiling
+	Let vShownValues = 'Absolute';
+	Let vAbsoluteFormat = '#' & chr(160) & '##0';
+	Let vPercentageFormat = '#' & chr(160) & '##0,0%';
+
+    // Stats table name for Load
+    Let CreateDataProfiling_sStatsTable = 'DataProfilingStats: NoConcatenate';
+
+    Let CreateDataProfiling_sFieldIndex = -1; // Indicator of empty data model
+
+    // Go through tables
+    for CreateDataProfiling_sTableIndex = 0 to NoOfTables()-1
+
+        // Get table name
+        Let CreateDataProfiling_sTableName = TableName(CreateDataProfiling_sTableIndex);
+        Trace $(CreateDataProfiling_sTableIndex) - $(CreateDataProfiling_sTableName);
+
+        // Go through fields of the table
+        for CreateDataProfiling_sFieldIndex = 1 to NoOfFields(CreateDataProfiling_sTableName)
+
+            // Get field name
+            Let CreateDataProfiling_sFieldName = FieldName(CreateDataProfiling_sFieldIndex, CreateDataProfiling_sTableName);
+            Trace |  >  $(CreateDataProfiling_sFieldIndex) - $(CreateDataProfiling_sFieldName);
+
+            // Load table and field name for stats table
+            tmpDataProfilingStat:
+            Load
+                '$(CreateDataProfiling_sTableName)' as [Table Name]
+                , '$(CreateDataProfiling_sFieldName)' as [Field Name]
+                , NoOfRows('$(CreateDataProfiling_sTableName)') as [No. of rows]
+            AutoGenerate 1;
+
+            // Calculate and join statistics
+            Left Join(tmpDataProfilingStat)
+            Load
+                Count([$(CreateDataProfiling_sFieldName)]) as Count
+                , Count(Distinct [$(CreateDataProfiling_sFieldName)]) as [Distinct Values]
+                , MinString([$(CreateDataProfiling_sFieldName)]) as [Min String Value]
+                , MaxString([$(CreateDataProfiling_sFieldName)]) as [Max String Value]
+                , Min([$(CreateDataProfiling_sFieldName)]) as [Min Value]
+                , Max([$(CreateDataProfiling_sFieldName)]) as [Max Value]
+                , Min(Len([$(CreateDataProfiling_sFieldName)])) as [Min Length]
+                , Max(Len([$(CreateDataProfiling_sFieldName)])) as [Max Length]
+                , Mode([$(CreateDataProfiling_sFieldName)]) as [Mode]
+                , Median([$(CreateDataProfiling_sFieldName)]) as [Median]
+                , Avg([$(CreateDataProfiling_sFieldName)]) as [Average]
+                , if(max(len(keepchar(lower([$(CreateDataProfiling_sFieldName)]), 'abcdefghijklmnopqrstuvwxyz'))) > 0, 'Yes', 'No') as [Has Alpha]
+                , if(max(len(keepchar(lower([$(CreateDataProfiling_sFieldName)]), '0123456789'))) > 0, 'Yes', 'No') as [Has Number]
+                , if(max(len(purgechar(lower([$(CreateDataProfiling_sFieldName)]), '0123456789abcdefghijklmnopqrstuvwxyz'))) > 0
+                    , 'Yes', 'No') as [Has Non Alhpa Num]
+                , Sum(if(isnull([$(CreateDataProfiling_sFieldName)]), 1, 0)) as [Null Values]
+                , Sum(if([$(CreateDataProfiling_sFieldName)] = '', 1, 0)) as [Blank Values]
+                , Sum(if(Trim(Replace([$(CreateDataProfiling_sFieldName)], ' ', '')) = '', 1, 0)) as [Whitespaced Values]
+                , Sum(if([$(CreateDataProfiling_sFieldName)] = 0, 1, 0)) as [Zero Values]
+                , Sum(if(Len(Trim(Right([$(CreateDataProfiling_sFieldName)], 1)))
+                         < Len(Right([$(CreateDataProfiling_sFieldName)], 1))
+                         and Trim(Replace([$(CreateDataProfiling_sFieldName)], ' ', '')) <> ''
+                         , 1, 0)
+                    ) as [Whitespaces in the end]
+            Resident [$(CreateDataProfiling_sTableName)];
+
+            // Fill the Stats table
+            $(CreateDataProfiling_sStatsTable)
+            Load * Resident tmpDataProfilingStat;
+            Drop Tables tmpDataProfilingStat;
+
+            Let CreateDataProfiling_sStatsTable = 'Concatenate(DataProfilingStats)';
+        Next CreateDataProfiling_sFieldIndex
+    Next CreateDataProfiling_sTableIndex
+
+    Trace CreateDataProfiling_sFieldIndex = $(CreateDataProfiling_sFieldIndex);
+
+    // If data model is not empty...
+    if CreateDataProfiling_sFieldIndex > -1 then
+        // Define key (common) fields
+        Left Join(DataProfilingStats)
+        Load
+            [Field Name]
+            , If(Count([Field Name]) > 1, Dual('Yes', 1), Dual('No', 0)) as [Is Key]
+        Resident
+            DataProfilingStats
+        Group By
+            [Field Name]
+        ;
+    EndIf
+
+    // Define formulas for KPIs via the following parameters:
+    // - KPISource - is the FROM part of the LOAD operator, including Autogenerate, etc.
+    // - KPI - is the KPI name
+    // - KPIFormulaAbsolute - is the formula for absolute KPI value
+    // - KPIFormulaPercentage - is the formula for relatinv KPI value in percents
+    // - KPIGroupBy - is the GROUP BY clause of the LOAD operator (not use so far, but... who knows)
+    KPIs:
+    Load * Inline "
+        KPISource; KPI; KPIFormulaAbsolute; KPIFormulaPercentage; KPIGroupBy
+        Resident DataProfilingStats; No. of key fields; Count(Distinct if([Is Key] = 'Yes', [Field Name])); Count(Distinct if([Is Key] = 'Yes', [Field Name])) / Count(Distinct [Field Name]);
+        Resident DataProfilingStats; No. of 100% filled fields; Count(Distinct if([Null Values] = 0 and [Blank Values] = 0, [Field Name])); Count(Distinct if([Null Values] = 0 and [Blank Values] = 0, [Field Name])) / Count(Distinct [Field Name]);
+        Autogenerate 1; No. of tables; NoOfTables() - 3; 1;
+    " (delimiter is ';');
+
+    // Calculate KPIs
+    for CreateDataProfiling_sFieldIndex = 0 to NoOfRows('KPIs') - 1
+        Let CreateDataProfiling_KPISource = Peek('KPISource', CreateDataProfiling_sFieldIndex, 'KPIs');
+        Let CreateDataProfiling_sKPI = Peek('KPI', CreateDataProfiling_sFieldIndex, 'KPIs');
+        Let CreateDataProfiling_sKPIFormulaAbsolute = Peek('KPIFormulaAbsolute', CreateDataProfiling_sFieldIndex, 'KPIs');
+        Let CreateDataProfiling_sKPIFormulaPercentage = Peek('KPIFormulaPercentage', CreateDataProfiling_sFieldIndex, 'KPIs');
+        Let CreateDataProfiling_sKPIGroupBy = Peek('KPIGroupBy', CreateDataProfiling_sFieldIndex, 'KPIs');
+
+        DataProfilingKPIs:
+        Load
+            '$(CreateDataProfiling_sKPI)' as [KPI Name]
+            , $(CreateDataProfiling_sKPIFormulaAbsolute) as [KPI Absolute Value]
+            , $(CreateDataProfiling_sKPIFormulaPercentage) as [KPI Percentage Value]
+        $(CreateDataProfiling_KPISource)
+         	$(CreateDataProfiling_sKPIGroupBy)
+        ;
+    next CreateDataProfiling_sFieldIndex
+
+    // Clean the temp data and variables
+    Drop Table KPIs;
+
+    CreateDataProfiling_sTableIndex=;
+    CreateDataProfiling_sTableName=;
+    CreateDataProfiling_sFieldIndex=;
+    CreateDataProfiling_sFieldName=;
+    CreateDataProfiling_sStatsTable=;
+    CreateDataProfiling_KPISource=;
+    CreateDataProfiling_sKPI=;
+    CreateDataProfiling_sKPIFormulaAbsolute=;
+    CreateDataProfiling_sKPIFormulaPercentage=;
+    CreateDataProfiling_sKPIGroupBy=;
+
+EndSub;

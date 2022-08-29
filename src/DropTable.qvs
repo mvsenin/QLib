@@ -1,0 +1,26 @@
+/*
+	Drops tables, if they exist
+    Parameters:
+     - @pDropTable_TableNames - list of Qlik table names delimited with comma
+*/
+
+Sub DropTable(pDropTable_TableNames)
+	// Space sign for Trace
+	if Len('$(pDropTable_TableNames)') > 0 then
+		pDropTable_TableNames = '''' & Replace(pDropTable_TableNames, ',', ''',''') & '''';
+		for each pDropTable_TableName in $(pDropTable_TableNames)
+			pDropTable_TableName = Trim(pDropTable_TableName);
+			if TableNumber('$(pDropTable_TableName)') >=0 then
+				Drop Table [$(pDropTable_TableName)];
+			End If
+		next pDropTable_TableName
+	End If
+	
+    pDropTable_TableNames=;
+	pDropTable_TableName=;
+End Sub;
+
+// A proxy method just in case ;-)
+Sub DropTables(pDropTable_TableNames)
+	Call DropTable(pDropTable_TableNames);
+End Sub;

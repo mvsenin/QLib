@@ -1,0 +1,13 @@
+/*
+	Returns Qlik server name basing on the ComputerName() value
+
+	Usage sample:
+		'https://$(=$(vQlikServerURL))/sense/app/'
+
+    Note: ComputerName() value depends on the host the script is executed on,
+	      so, in case your publisher server is running on a separate host, you
+		  will inevitebly get different values in the task running on
+		  the publisher server and in the script editor
+*/
+
+Set vQlikServerURL = Pick(Match(ComputerName(), 'LOCALHOST'), 'BI.YOU.DOMAIN');

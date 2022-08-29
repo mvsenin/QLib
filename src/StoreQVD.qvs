@@ -1,0 +1,51 @@
+/*
+	Stores Qlik table $(pStoreQVD_QlikTableName) as QVD-file $(pStoreQVD_FileName).
+
+    Parameters:
+     - @pStoreQVD_QlikTableName - Qlik table name
+     - @pStoreQVD_FileName - file full path
+	 - @pStoreQVD_NoDrop - flag for drop operation, it's True() by default,
+                           otherwise it's False()
+	 - @pStoreQVD_ZeroRowStore - flag for zero row tables, it's True() by
+                                 default, otherwise it's False()
+
+	Usage sample:
+		Call StoreQVD('tmpData', '$(sDestinationFile)');
+*/
+Sub StoreQVD(pStoreQVD_QlikTableName, pStoreQVD_FileName, pStoreQVD_NoDrop, pStoreQVD_ZeroRowStore)
+
+	// Store zero row tables by default, but check pStoreQVD_ZeroRowStore
+	if IsNull(pStoreQVD_ZeroRowStore) then
+		pStoreQVD_ZeroRowStore = True()
+	ElseIf pStoreQVD_ZeroRowStore <> True() Then
+		pStoreQVD_ZeroRowStore = False()
+	End If
+
+	// Check whether table exists and should the empty table be stored
+	if TableNumber('$(pStoreQVD_QlikTableName)')>=0 and (pStoreQVD_ZeroRowStore or NoOfRows('$(pStoreQVD_QlikTableName)') > 0) then
+		// Drop tables by default, but check the pStoreQVD_NoDrop
+		if IsNull(pStoreQVD_NoDrop) then
+			pStoreQVD_NoDrop = True()
+		ElseIf pStoreQVD_NoDrop <> True() Then
+			pStoreQVD_NoDrop = False()
+		End If
+
+		if $(FileExists($(pStoreQVD_FileName))) then
+			Trace [StoreQVD] Rewriting: $(pStoreQVD_FileName);
+		Else
+			Trace [StoreQVD] Storing: $(pStoreQVD_FileName);
+		End If
+
+		Store [$(pStoreQVD_QlikTableName)] into [$(pStoreQVD_FileName)] (qvd);
+		
+		// Drop if needed
+		if pStoreQVD_NoDrop then
+			Drop Table [$(pStoreQVD_QlikTableName)];
+		End If
+	End If
+	
+    pStoreQVD_QlikTableName=;
+  	pStoreQVD_FileName=;
+	pStoreQVD_NoDrop=;
+	pStoreQVD_ZeroRowStore=;
+EndSub;

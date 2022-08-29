@@ -1,0 +1,14 @@
+/*
+	Compares time of origin and destination files and returns True()
+	if origin one is newer, otherwise returns False()
+
+    Parameters:
+     - @$1 - origin file with full path and extension, text
+	 - @$2 - destination file, supposed to be rewritten, with full path and extension, text
+
+	Usage sample:
+		if $(FileExists($(sOriginFile))) and ($(NewerFile($(sOriginFile), $(sDestinationFile)))) then
+		...
+		end if
+*/
+Set NewerFile = if(Alt(FileTime('$1'), 0) * 1000000000 > Alt(FileTime('$2'), 0) * 1000000000, True(), False());

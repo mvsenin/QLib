@@ -1,0 +1,12 @@
+/*
+	Checks and returns file presence flag
+
+    Parameters:
+     - @$1 - file name with full path and extesion
+
+	Usage sample:
+		if $(FileExists($(sOriginFile))) and ($(NewerFile($(sOriginFile), $(sDestinationFile)))) then
+		...
+		end if
+*/
+Set FileExists = if(FileSize('$1') > 0, True(), False());

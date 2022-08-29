@@ -1,0 +1,859 @@
+{
+  "qInfo": {
+    "qId": "ckmwz",
+    "qType": "table"
+  },
+  "qMeta": {
+    "privileges": [
+      "read",
+      "update",
+      "delete",
+      "exportdata"
+    ]
+  },
+  "qSelectionInfo": {},
+  "qHyperCube": {
+    "qSize": {
+      "qcx": 13,
+      "qcy": 5
+    },
+    "qDimensionInfo": [
+      {
+        "qFallbackTitle": "Table Name",
+        "qApprMaxGlyphCount": 35,
+        "qCardinal": 1,
+        "qSortIndicator": "D",
+        "qGroupFallbackTitles": [
+          "Table Name"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 1,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [
+          "$text"
+        ],
+        "qDimensionType": "D",
+        "qReverseSort": true,
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "U",
+          "qnDec": 0,
+          "qUseThou": 0
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Table Name"
+        ],
+        "qMin": "NaN",
+        "qMax": "NaN",
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 1,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "AUCAmSH",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      },
+      {
+        "qFallbackTitle": "Field Name",
+        "qApprMaxGlyphCount": 28,
+        "qCardinal": 5,
+        "qSortIndicator": "A",
+        "qGroupFallbackTitles": [
+          "Field Name"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 5,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [
+          "$text"
+        ],
+        "qDimensionType": "D",
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "U",
+          "qnDec": 0,
+          "qUseThou": 0
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Field Name"
+        ],
+        "qMin": "NaN",
+        "qMax": "NaN",
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 5,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "uJDSRk",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      },
+      {
+        "qFallbackTitle": "Count",
+        "qApprMaxGlyphCount": 5,
+        "qCardinal": 1,
+        "qSortIndicator": "A",
+        "qGroupFallbackTitles": [
+          "Count"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 1,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [
+          "$numeric",
+          "$integer"
+        ],
+        "qDimensionType": "N",
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "I",
+          "qnDec": 0,
+          "qUseThou": 1,
+          "qFmt": "###0",
+          "qDec": "."
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Count"
+        ],
+        "qMin": 21872,
+        "qMax": 21872,
+        "qContinuousAxes": true,
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 1,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "BFBBnk",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      },
+      {
+        "qFallbackTitle": "Distinct Values",
+        "qApprMaxGlyphCount": 5,
+        "qCardinal": 5,
+        "qSortIndicator": "A",
+        "qGroupFallbackTitles": [
+          "Distinct Values"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 5,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [
+          "$numeric",
+          "$integer"
+        ],
+        "qDimensionType": "N",
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "I",
+          "qnDec": 0,
+          "qUseThou": 1,
+          "qFmt": "###0",
+          "qDec": "."
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Distinct Values"
+        ],
+        "qMin": 27,
+        "qMax": 21809,
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 5,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "uXmmN",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      },
+      {
+        "qFallbackTitle": "Min Value",
+        "qApprMaxGlyphCount": 18,
+        "qCardinal": 4,
+        "qSortIndicator": "A",
+        "qGroupFallbackTitles": [
+          "Min Value"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 4,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [],
+        "qDimensionType": "N",
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "U",
+          "qnDec": 0,
+          "qUseThou": 0
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Min Value"
+        ],
+        "qMin": 1,
+        "qMax": 43770,
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 4,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "PaJK",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      },
+      {
+        "qFallbackTitle": "Max Value",
+        "qApprMaxGlyphCount": 18,
+        "qCardinal": 4,
+        "qSortIndicator": "A",
+        "qGroupFallbackTitles": [
+          "Max Value"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 4,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [],
+        "qDimensionType": "N",
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "U",
+          "qnDec": 0,
+          "qUseThou": 0
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Max Value"
+        ],
+        "qMin": 690,
+        "qMax": 43799,
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 4,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "kAzDvkJ",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      },
+      {
+        "qFallbackTitle": "Min Length",
+        "qApprMaxGlyphCount": 2,
+        "qCardinal": 4,
+        "qSortIndicator": "A",
+        "qGroupFallbackTitles": [
+          "Min Length"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 4,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [
+          "$numeric",
+          "$integer"
+        ],
+        "qDimensionType": "N",
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "I",
+          "qnDec": 0,
+          "qUseThou": 1,
+          "qFmt": "###0",
+          "qDec": "."
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Min Length"
+        ],
+        "qMin": 1,
+        "qMax": 18,
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 4,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "pLWe",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      },
+      {
+        "qFallbackTitle": "Max Length",
+        "qApprMaxGlyphCount": 2,
+        "qCardinal": 4,
+        "qSortIndicator": "A",
+        "qGroupFallbackTitles": [
+          "Max Length"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 4,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [
+          "$numeric",
+          "$integer"
+        ],
+        "qDimensionType": "N",
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "I",
+          "qnDec": 0,
+          "qUseThou": 1,
+          "qFmt": "###0",
+          "qDec": "."
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Max Length"
+        ],
+        "qMin": 3,
+        "qMax": 18,
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 4,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "SRjNZp",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      },
+      {
+        "qFallbackTitle": "Has Number",
+        "qApprMaxGlyphCount": 3,
+        "qCardinal": 1,
+        "qSortIndicator": "A",
+        "qGroupFallbackTitles": [
+          "Has Number"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 1,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [
+          "$ascii",
+          "$text"
+        ],
+        "qDimensionType": "D",
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "U",
+          "qnDec": 0,
+          "qUseThou": 0
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Has Number"
+        ],
+        "qMin": "NaN",
+        "qMax": "NaN",
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 1,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "ErKyg",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      },
+      {
+        "qFallbackTitle": "Has Alpha",
+        "qApprMaxGlyphCount": 2,
+        "qCardinal": 1,
+        "qSortIndicator": "A",
+        "qGroupFallbackTitles": [
+          "Has Alpha"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 1,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [
+          "$ascii",
+          "$text"
+        ],
+        "qDimensionType": "D",
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "U",
+          "qnDec": 0,
+          "qUseThou": 0
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Has Alpha"
+        ],
+        "qMin": "NaN",
+        "qMax": "NaN",
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 1,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "dhmjrrp",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      },
+      {
+        "qFallbackTitle": "Has Non Alhpa Num",
+        "qApprMaxGlyphCount": 3,
+        "qCardinal": 2,
+        "qSortIndicator": "A",
+        "qGroupFallbackTitles": [
+          "Has Non Alhpa Num"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 2,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [
+          "$ascii",
+          "$text"
+        ],
+        "qDimensionType": "D",
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "U",
+          "qnDec": 0,
+          "qUseThou": 0
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Has Non Alhpa Num"
+        ],
+        "qMin": "NaN",
+        "qMax": "NaN",
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 2,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "xAPpXY",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      },
+      {
+        "qFallbackTitle": "Null Values",
+        "qApprMaxGlyphCount": 1,
+        "qCardinal": 1,
+        "qSortIndicator": "A",
+        "qGroupFallbackTitles": [
+          "Null Values"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 1,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [
+          "$numeric",
+          "$integer"
+        ],
+        "qDimensionType": "N",
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "U",
+          "qnDec": 0,
+          "qUseThou": 0
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Null Values"
+        ],
+        "qMin": 0,
+        "qMax": 0,
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 1,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "LKEQzr",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      },
+      {
+        "qFallbackTitle": "Blank Values",
+        "qApprMaxGlyphCount": 1,
+        "qCardinal": 2,
+        "qSortIndicator": "A",
+        "qGroupFallbackTitles": [
+          "Blank Values"
+        ],
+        "qGroupPos": 0,
+        "qStateCounts": {
+          "qLocked": 0,
+          "qSelected": 0,
+          "qOption": 2,
+          "qDeselected": 0,
+          "qAlternative": 0,
+          "qExcluded": 0,
+          "qSelectedExcluded": 0,
+          "qLockedExcluded": 0
+        },
+        "qTags": [
+          "$numeric",
+          "$integer"
+        ],
+        "qDimensionType": "N",
+        "qGrouping": "N",
+        "qNumFormat": {
+          "qType": "U",
+          "qnDec": 0,
+          "qUseThou": 0
+        },
+        "qIsAutoFormat": true,
+        "qGroupFieldDefs": [
+          "Blank Values"
+        ],
+        "qMin": 0,
+        "qMax": 1,
+        "qAttrExprInfo": [],
+        "qAttrDimInfo": [],
+        "qCardinalities": {
+          "qCardinal": 2,
+          "qHypercubeCardinal": 0,
+          "qAllValuesCardinal": -1
+        },
+        "autoSort": true,
+        "cId": "cxpAp",
+        "othersLabel": "Другие",
+        "textAlign": {
+          "auto": true,
+          "align": "left"
+        },
+        "representation": {
+          "type": "text",
+          "urlPosition": "dimension",
+          "urlLabel": "",
+          "linkUrl": ""
+        }
+      }
+    ],
+    "qMeasureInfo": [],
+    "qEffectiveInterColumnSortOrder": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "qGrandTotalRow": [],
+    "qDataPages": [],
+    "qPivotDataPages": [],
+    "qStackedDataPages": [],
+    "qMode": "S",
+    "qNoOfLeftDims": -1,
+    "qTreeNodesOnDim": [],
+    "qColumnOrder": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "columnOrder": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "columnWidths": [
+      139,
+      161,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ]
+  },
+  "search": {
+    "sorting": "auto"
+  },
+  "showTitles": true,
+  "title": "",
+  "subtitle": "",
+  "footnote": "",
+  "disableNavMenu": false,
+  "showDetails": false,
+  "components": [],
+  "totals": {
+    "show": true,
+    "position": "noTotals",
+    "label": "Итоги"
+  },
+  "scrolling": {
+    "horizontal": true,
+    "keepFirstColumnInView": false,
+    "keepFirstColumnInViewTouch": false
+  },
+  "multiline": {
+    "wrapTextInHeaders": true,
+    "wrapTextInCells": true
+  },
+  "visualization": "table"
+}

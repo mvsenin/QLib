@@ -1,0 +1,38 @@
+// QLib folder connection
+Let QLibBasePath = 'lib://QVD';
+
+/*
+	Data Profiling
+*/
+$(Must_Include=$(QLibBasePath)/CreateDataProfiling.qvs);
+
+/*
+	Table Operations
+*/
+$(Must_Include=$(QLibBasePath)/DropTable.qvs);
+$(Must_Include=$(QLibBasePath)/ShowNoOfRows.qvs);
+
+/*
+	File operations
+*/
+$(Must_Include=$(QLibBasePath)/FileExists.qvs);
+$(Must_Include=$(QLibBasePath)/NewerFile.qvs);
+$(Must_Include=$(QLibBasePath)/StoreQVD.qvs);
+$(Must_Include=$(QLibBasePath)/LoadQVD.qvs);
+
+/*
+	Logging
+*/
+$(Must_Include=$(QLibBasePath)/Trace.qvs);
+
+/*
+	URLs
+*/
+$(Must_Include=$(QLibBasePath)/vQlikServerURL.qvs);
+
+/*
+	Clean up QLib variables
+*/
+$(Must_Include=$(QLibBasePath)/QLibCleanUp.qvs);
+
+QLibBasePath=;

@@ -1,0 +1,10 @@
+/*
+	Clean up QLib variables
+
+	Usage sample:
+		Call QLibCleanUp;
+*/
+Sub QLibCleanUp
+	FileExists=;
+	NewerFile=;
+EndSub;
