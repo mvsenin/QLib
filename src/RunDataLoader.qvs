@@ -1,0 +1,374 @@
+/*
+	RunDataLoader procedure initiates massive data loading according to settings
+    provided in the "Data Loader Configuration.xlsx" configuration file, stored
+    under the "Data Loader" folder of the source folder
+    
+    Dependencies:
+		Trace.qvs
+		Cron.qvs
+		DropTables.qvs
+		StoreQVD.qvs
+		
+	Parameters:
+		@sRunDataLoader_SourceFolder - source folder name
+		@sRunDataLoader_Queue - queue identifier
+
+    Usage sample:
+    	Call RunDataLoader('lib://Source Folder/Source A');
+*/
+
+// 2022-09-29: ToDo:
+// - проверка периодов по Cron, пока только точное время
+// - поддержка inctemental loading
+// - поддержка сохранения загруженной таблицы по периодам их поля LoadAndStoreField
+// - поддержка Full loading по дате sFullExtract_StartDate
+// - поддержка REST и web
+// - поддержка ?FieldReduction
+
+Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
+	if IsNull(sRunDataLoader_Queue) then
+		Let sRunDataLoader_Queue = 'and IsNull(Queue)';
+	Else
+		Let sRunDataLoader_Queue = 'and Queue = ''$(sRunDataLoader_Queue)''';
+	EndIf
+	;
+	
+	if Len(vCronMDay) = 0 then
+		$(Must_Include=$(QLibBasePath)/Cron.qvs);
+	EndIf
+	;
+	
+	// Build config. file name
+	Let sRunDataLoader_ConfigFileName = '$(sRunDataLoader_SourceFolder)/Data Loader/Data Loader Configuration.xlsx';
+	
+	// Generate preset Qlik Sense variables
+	Variables:
+	Load
+		VarOperator
+		, VarName
+		, VarDefinition
+		, ?VarActive
+    FROM
+		[$(sRunDataLoader_ConfigFileName)] (ooxml, embedded labels, table is Variables)
+    Where
+    	?VarActive = 1
+		and VarType = 'QlikSense';
+    ;
+	
+	// Process variable data
+    For sRunDataLoader_Var = 0 to NoOfRows('Variables') - 1
+		Let sRunDataLoader_VarOperator = Peek('VarOperator', sRunDataLoader_Var, 'Variables');
+		Let sRunDataLoader_VarName = Peek('VarName', sRunDataLoader_Var, 'Variables');
+		Let sRunDataLoader_VarDefinition = Peek('VarDefinition', sRunDataLoader_Var, 'Variables');
+		If Len(sRunDataLoader_VarOperator) > 0 and Len(sRunDataLoader_VarName) > 0 and Len(sRunDataLoader_VarDefinition) > 0 then
+			If Upper(sRunDataLoader_VarOperator) = 'LET' Then
+				Let $(sRunDataLoader_VarName) = $(sRunDataLoader_VarDefinition);
+			ElseIf Upper(sRunDataLoader_VarOperator) = 'SET' Then
+				Set $(sRunDataLoader_VarName) = $(sRunDataLoader_VarDefinition);
+			End If
+		End If
+		;
+	Next sRunDataLoader_Var
+	;
+	
+	Call DropTables('Variables');
+
+	// Default variable settings, in case there are nothing is provide in the config. file
+	If '' = sFullExtract_StartDate then
+		// Load last two years in 'Full loading mode' by default
+		Let sFullExtract_StartDate = floor(AddMonths(Today(), -12));
+	End If
+	;
+	If '' = sPartialExtract_StartDate then
+		// Load last two months in 'Partial loading mode' by default
+		Let sPartialExtract_StartDate = floor(MonthStart(Today(), -2));
+	End If
+	;
+	If '' = sReloadMode then
+		Let	sReloadMode	= 'F'; // 'Full loading mode' by default
+	End If
+	;
+
+    // Load active data sources info.
+    Sources:
+    LOAD
+        "DB Name"
+        , "Data Folder"
+        , "Scheme Name"
+        , "Data Connection"
+    FROM
+		[$(sRunDataLoader_ConfigFileName)] (ooxml, embedded labels, table is [Data Sources])
+    Where
+    	?Active = 1;
+    ;
+    
+    // Process each data source
+    For sRunDataLoader_Source = 0 to NoOfRows('Sources') - 1
+    	Let sRunDataLoader_DBName = Peek('DB Name', sRunDataLoader_Source, 'Sources');
+        Let sRunDataLoader_DataFolder = Peek('Data Folder', sRunDataLoader_Source, 'Sources');
+        Let sRunDataLoader_SchemeName = Peek('Scheme Name', sRunDataLoader_Source, 'Sources');
+        Let sRunDataLoader_DataConnection = Peek('Data Connection', sRunDataLoader_Source, 'Sources');
+
+    	Call Trace('$(sRunDataLoader_Source) - $(sRunDataLoader_DBName)');
+        
+        Tables:
+        LOAD
+            "DB Name"
+            , "Table Name"
+            , "QVD Name"
+            , ?StoreInSubFolder
+            , Where
+            , ?TablePart
+			, Cron
+			, LoadMode
+			, WhereIncremental
+			, StoringMode
+			, LoadAndStoreField
+			, ?FieldReduction
+			, ?Active
+			, "Select"
+			, Queue
+			, Comments
+        FROM [$(sRunDataLoader_ConfigFileName)] (ooxml, embedded labels, table is Tables)
+        Where
+            "DB Name" = '$(sRunDataLoader_DBName)'
+			and Len("Table Name") > 0
+            and ?Active = 1
+			$(sRunDataLoader_Queue);
+    	;
+        
+        if NoOfRows('Tables') > 0 then
+        	Trace $(sRunDataLoader_DataFolder) | $(sRunDataLoader_SchemeName) | $(sRunDataLoader_DataConnection);
+        	LIB Connect To '$(sRunDataLoader_DataConnection)';
+            
+            For sRunDataLoader_Table = 0 to NoOfRows('Tables') - 1
+            	Let sRunDataLoader_TableName = Trim(Peek('Table Name', sRunDataLoader_Table, 'Tables'));
+                Let sRunDataLoader_StoreInSubFolder = Peek('?StoreInSubFolder', sRunDataLoader_Table, 'Tables');
+				Let sRunDataLoader_Cron = Upper(Peek('Cron', sRunDataLoader_Table, 'Tables'));
+                Let sRunDataLoader_LoadMode = Upper(Peek('LoadMode', sRunDataLoader_Table, 'Tables'));
+                Let sRunDataLoader_WhereIncremental = Upper(Peek('WhereIncremental', sRunDataLoader_Table, 'Tables'));
+                Let sRunDataLoader_StoringMode = Upper(Peek('StoringMode', sRunDataLoader_Table, 'Tables'));
+                Let sRunDataLoader_LoadAndStoreField = Upper(Peek('LoadAndStoreField', sRunDataLoader_Table, 'Tables'));
+				Let sRunDataLoader_Select = Upper(Peek('Select', sRunDataLoader_Table, 'Tables'));
+                
+                // Задать имя выходного файла
+                Let sRunDataLoader_QVDName = '$(sRunDataLoader_SourceFolder)/$(sRunDataLoader_SchemeName)/';
+				
+				// Взять имя QVD, если оно есть, если нет, то приравнять к имени таблицы
+				Let sRunDataLoader_QVDName_tmp = Trim(Peek('QVD Name', sRunDataLoader_Table, 'Tables'));
+				if Len(sRunDataLoader_QVDName_tmp) <= 0 then
+					sRunDataLoader_QVDName_tmp = sRunDataLoader_TableName;
+				EndIf
+				;
+				
+				// Сформировать выражение для FROM - имя таблицы или подзапрос
+				if Len(sRunDataLoader_Select) = 0 then
+					Let vRunDataLoader_From = '"$(sRunDataLoader_SchemeName)"."$(sRunDataLoader_TableName)"';
+				Else
+					Let vRunDataLoader_From = '($(sRunDataLoader_Select)) T';
+				EndIf
+				;
+				
+                // Добавить подпапку, если нужно
+                If 1 = sRunDataLoader_StoreInSubFolder then
+                	Let sRunDataLoader_QVDName = sRunDataLoader_QVDName & sRunDataLoader_QVDName_tmp & '/';
+                EndIf
+                ;
+                Let sRunDataLoader_QVDName = sRunDataLoader_QVDName & sRunDataLoader_QVDName_tmp;
+                // Добавить маску периода
+                If 'M' = sRunDataLoader_StoringMode then
+                	Let sRunDataLoader_QVDName = sRunDataLoader_QVDName & '_#YYYY##MM#';
+                EndIf
+                ;
+                Let sRunDataLoader_QVDName = sRunDataLoader_QVDName & '.qvd';
+
+				// Проверить условие по Cron
+				Let sRunDataLoader_UTCDelta = 1 / 8; // дельта времени файла относительно UTC
+				if Len(sRunDataLoader_Cron) > 0 then
+					// В качестве имени файла с периодом берём сегодняшние ГГГГ и ММ
+					Let sRunDataLoader_QVDName_tmp = Replace(
+                            						   Replace(sRunDataLoader_QVDName
+                                                        , '#YYYY#', Year(Today(1))
+                                                        )
+                            							, '#MM#', Num(Month(Today(1)), '00')
+                                                        );
+					Let sRunDataLoader_FileTime = Timestamp(FileTime(sRunDataLoader_QVDName_tmp) + sRunDataLoader_UTCDelta);
+					Let sRunDataLoader_CronMDay = $(vCronMDay($(sRunDataLoader_Cron)));
+					Let sRunDataLoader_CronWDay = $(vCronWDay($(sRunDataLoader_Cron)));
+					// Trace CRON: $(sRunDataLoader_Cron);
+					// Trace FileName: $(sRunDataLoader_QVDName_tmp) | FileTime: $(sRunDataLoader_FileTime) | MDay: $(sRunDataLoader_CronMDay) | WDay: $(sRunDataLoader_CronWDay);
+				EndIf
+				;
+				
+				// Проверить условия по Cron, если (а) оно задано и файла нет ИЛИ (б) оно не задано ИЛИ (в) время дня месяца ИЛИ (в) дня недели по Corn больше времени файла
+				if (Len(sRunDataLoader_Cron) > 0 and Len(sRunDataLoader_FileTime) = 0) or (Len(sRunDataLoader_Cron) = 0) or (sRunDataLoader_CronMDay > 0 and sRunDataLoader_CronMDay > sRunDataLoader_FileTime) or (sRunDataLoader_CronWDay > 0 and sRunDataLoader_CronWDay > sRunDataLoader_FileTime) then
+					Trace Initiate data loading...;
+
+					// Полная загрузка
+					// ('F' = sReloadMode) or
+					If ('F' = sRunDataLoader_LoadMode) then
+						// Сохранение полной таблицы
+						If 'F' = sRunDataLoader_StoringMode then
+							Let sRunDataLoader_Where = Peek('Where', sRunDataLoader_Table, 'Tables');
+							if Len(sRunDataLoader_Where) > 0 then
+								Let sRunDataLoader_Where = 'WHERE $(sRunDataLoader_Where)';
+							Else
+								Let sRunDataLoader_Where = '';
+							EndIf
+							;
+
+							Trace Loading and storing $(sRunDataLoader_QVDName)...;
+							TableData:
+			//                 Load Null() as F AutoGenerate 1; // DBG
+							SQL Select
+								*
+			//                     count(*)
+							From
+								$(vRunDataLoader_From)
+			//					"$(sRunDataLoader_SchemeName)"."$(sRunDataLoader_TableName)"
+							$(sRunDataLoader_Where)
+							;
+
+							Call StoreQVD('TableData', '$(sRunDataLoader_QVDName)');
+						// Сохранение загруженной таблицы по периодам из sRunDataLoader_StoringMode
+						// по полю из LoadAndStoreField
+						ElseIf Len(sRunDataLoader_LoadAndStoreField) > 0 then
+							Trace TBD >> Storing loaded table per periods...;
+						ElseIf Len(sRunDataLoader_StoringMode) = 0 then
+							Trace There is no loading & storing mode provided in the "LoadAndStoreField" attribute for the table  "$(sRunDataLoader_TableName)";
+						Else
+							Trace To store the table "$(sRunDataLoader_TableName)" in the "$(sRunDataLoader_StoringMode)" mode you need set the "LoadAndStoreField" attribute;
+						End If
+						;
+					// Partial loading stating from 
+					ElseIf 'P' = sRunDataLoader_LoadMode then
+						If (Len(sRunDataLoader_LoadAndStoreField)) > 0 and (Len(sRunDataLoader_WhereIncremental) > 0) then
+							// Пока загрузка только помесячная
+							Let sRunDataLoader_sStartDate = sFullExtract_StartDate;
+							if 'P' = sReloadMode then
+								Let sRunDataLoader_sStartDate = sPartialExtract_StartDate;
+							End If
+							;
+							Let sRunDataLoader_sEndDate = Date(Today());
+							
+							// Get start year
+							Let sRunDataLoader_sStartYear = Year(sRunDataLoader_sStartDate);
+
+							if sRunDataLoader_sStartYear > Year(Today()) then
+								Let sRunDataLoader_sStartYear = Year(Today());
+							EndIf
+
+							// Get start month
+							Let sRunDataLoader_sStartMonth = Floor(Month(sRunDataLoader_sStartDate));
+
+							If sRunDataLoader_sStartMonth < 1 or sRunDataLoader_sStartMonth > 12 then
+								sRunDataLoader_sStartMonth = 1;
+							End If
+
+							// Cycle though months beginning form the start date year & month
+							Let sRunDataLoader_sYearNo = sRunDataLoader_sStartYear;
+							Let sRunDataLoader_sMonthNo = sRunDataLoader_sStartMonth;
+							
+							Do while (sRunDataLoader_sYearNo < Year(sRunDataLoader_sEndDate) and sRunDataLoader_sMonthNo <= 12) or (sRunDataLoader_sYearNo = Year(sRunDataLoader_sEndDate) and sRunDataLoader_sMonthNo <= Month(sRunDataLoader_sEndDate))
+								Let sYYYYMM = sRunDataLoader_sYearNo * 100 + sRunDataLoader_sMonthNo;
+								
+								Let sRunDataLoader_Where = 'WHERE ' & Replace(
+														   Replace(sRunDataLoader_WhereIncremental
+															, '#YYYY#', sRunDataLoader_sYearNo
+															)
+															, '#MM#', Num(sRunDataLoader_sMonthNo, '00')
+															);
+								
+								Let sRunDataLoader_QVDName_Final = Replace(
+														   Replace(sRunDataLoader_QVDName
+															, '#YYYY#', sRunDataLoader_sYearNo
+															)
+															, '#MM#', Num(sRunDataLoader_sMonthNo, '00')
+															);
+								Trace Loading and storing $(sRunDataLoader_QVDName_Final)...;
+								TableData:
+				//                 Load Null() as F AutoGenerate 1; // DBG
+								SQL Select
+									*
+				//                     count(*)
+								From
+									$(vRunDataLoader_From)
+				//					"$(sRunDataLoader_SchemeName)"."$(sRunDataLoader_TableName)"
+								$(sRunDataLoader_Where)
+								;
+
+								Call StoreQVD('TableData', '$(sRunDataLoader_QVDName_Final)');
+
+								// Get next yaer & month
+								// ToDo: Get next quarter/week/day
+								if sRunDataLoader_sMonthNo = 12 then
+									Let sRunDataLoader_sMonthNo = 1;
+									Let sRunDataLoader_sYearNo = sRunDataLoader_sYearNo + 1;
+								Else
+									Let sRunDataLoader_sMonthNo = sRunDataLoader_sMonthNo + 1;
+								EndIf
+							Loop
+						Else
+							Trace To load in the "$(sRunDataLoader_LoadMode)" mode you need to provide conditions in the "WhereIncremental" attribute and filed name in the "LoadAndStoreField" attribute;
+						End If
+						;
+					ElseIf 'I' = sRunDataLoader_LoadMode then
+						Trace TBD >> Incremental loading...;
+					End If
+					;
+				Else
+					Trace Skip data loading for $(sRunDataLoader_QVDName_tmp)...;
+				EndIf
+				;
+
+            Next sRunDataLoader_Table
+            ;
+
+        EndIf
+        ;
+        
+		Call DropTables('Tables');
+        
+    Next sRunDataLoader_Source
+    ;
+
+	Call DropTables('Sources');
+
+	sFullExtract_StartDate=;
+    sPartialExtract_StartDate=;
+    sReloadMode=;
+    sRunDataLoader_Source=;
+    sRunDataLoader_DBName=;
+    sRunDataLoader_DataFolder=;
+    sRunDataLoader_SchemeName=;
+    sRunDataLoader_DataConnection=;
+    sRunDataLoader_ConfigFileName=;
+    sRunDataLoader_Table=;
+    sRunDataLoader_TableName=;
+    sRunDataLoader_QVDName=;
+    sRunDataLoader_QVDName_Final=;
+    sRunDataLoader_StoreInSubFolder=;
+    sRunDataLoader_LoadAndStoreField=;
+    sRunDataLoader_WhereIncremental=;
+    sRunDataLoader_Where=;
+    sRunDataLoader_LoadMode=;
+    sRunDataLoader_StoringMode=;
+    sRunDataLoader_sStartDate=;
+    sRunDataLoader_sEndDate=;
+    sRunDataLoader_sYearNo=;
+    sRunDataLoader_sStartYear=;
+    sRunDataLoader_sMonthNo=;
+    sRunDataLoader_sStartMonth=;
+	sRunDataLoader_Var=;
+	sRunDataLoader_VarOperator=;
+	sRunDataLoader_VarName=;
+	sRunDataLoader_VarDefinition=;
+	sRunDataLoader_CronMDay=;
+	sRunDataLoader_CronWDay=;
+	sRunDataLoader_UTCDelta=;
+	sRunDataLoader_QVDName_tmp=;
+	sRunDataLoader_FileTime=;
+	sRunDataLoader_Queue=;
+	vRunDataLoader_From=;
+EndSub
+;

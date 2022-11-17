@@ -1,0 +1,66 @@
+/*
+	The Cron script initializes Qlik variable intented to implement cron-like
+	checks of time values.
+    
+    Variables:
+		@vCronMinute - current minute
+		@vCronHour - current hour
+		@vCronDay - current month day number
+		@vCronMonth - current month number
+		@vCronWeekDay - current week day number
+		@vCronYear - current year
+		@vCronMDay($1) - returns month day based date/time
+		@vCronWDay($1) - returns week day based date/time
+
+    Usage sample with comments:
+		Set vCron = '15 17 28 9 0'; // разделитель 1 (один) пробел
+
+        //		     *  *  *  *  *  выполняемая команда
+        //    		 -  -  -  -  -
+        //     		 |  |  |  |  |
+        //     		 |  |  |  |  ----- день недели (0—7) (воскресенье = 0 или 7)
+        //     		 |  |  |  ------- месяц (1—12)
+        //     		 |  |  --------- день (1—31)
+        //     		 |  ----------- час (0—23)
+		//		     ------------- минута (0—59)
+        //    
+        //    Все условия (времени запуска) проверяются по «логическому И»,
+        //    кроме условий «день недели» и «день месяца» - указанные совместно,
+        //    они обрабатываются по «логическому ИЛИ», то есть «по любому из дней»
+
+		// The following returns current day in the 10th month of the current
+		// year
+    	Let vMDateTime = $(vCronMDay('* * 10 * *');
+
+		// The following returns current day in the 10th month of the current
+		// year, if this is the Sunday
+		Let vWDateTime = $(vCronWDay('* * 10 * 0');
+*/
+
+//// ToDo: describing, getting and usging data sectioning logic
+//// ToDo: describing and getting field list, including adopted one...
+//// ToDo: process Where: conditions, increment, etc.
+//// 2022-09-22: ToDo: проверка периодов по Cron, пока только точное время
+
+Let vCronMinute = Minute(Now(1));
+Let vCronHour = Hour(Now(1));
+Let vCronDay = Day(Now(1));
+Let vCronMonth = Floor(Month(Now(1)));
+Let vCronWeekDay = Floor(WeekDay(Now(1)));
+Let vCronYear = Year(Now(1));
+
+Set vCronMDay = Timestamp(Timestamp#(
+				if(SubField('$1', ' ', 1) = '*', 0 /*vCronMinute*/, SubField('$1', ' ', 1)) & ' ' &
+				if(SubField('$1', ' ', 2) = '*', vCronHour, SubField('$1', ' ', 2)) & ' ' &
+                if(SubField('$1', ' ', 3) = '*', vCronDay, SubField('$1', ' ', 3)) & ' ' &
+                if(SubField('$1', ' ', 4) = '*', vCronMonth, SubField('$1', ' ', 4)) & ' ? ' &
+                vCronYear
+                ,'mm hh DD M ? YYYY'));
+
+Set vCronWDay = Timestamp(Timestamp#(
+				if(SubField('$1', ' ', 1) = '*', 0 /*vCronMinute*/, SubField('$1', ' ', 1)) & ' ' &
+				if(SubField('$1', ' ', 2) = '*', vCronHour, SubField('$1', ' ', 2)) & ' ' &
+                if(SubField('$1', ' ', 5) = '*', vCronDay, if(vCronWeekDay = SubField('$1', ' ', 5), vCronDay)) & ' ' &
+                if(SubField('$1', ' ', 4) = '*', vCronMonth, SubField('$1', ' ', 4)) & ' ? ' &
+                vCronYear
+                ,'mm hh DD M ? YYYY'));

@@ -1,0 +1,126 @@
+/*
+	GenerateColorVariables - loads color codes and generates variables
+
+	@sGenerateColorVariables_Mode - generation mode, case insensitive:
+    	- Create (or empty) - generate color variables
+        - Clean - clean color variables
+
+	Usage example:
+		Call GenerateColorVariables;
+		Call GenerateColorVariables('clean');
+*/
+Sub GenerateColorVariables(sGenerateColorVariables_Mode, sGenerateColorVariables_CleanupData)
+
+	If IsNull(sGenerateColorVariables_Cleanup) then
+		Let sGenerateColorVariables_Cleanup = True();
+	EndIf
+	;
+	
+	If IsNull(sGenerateColorVariables_Mode) or 'CREATE' = Upper(sGenerateColorVariables_Mode) then
+    	Let sGenerateColorVariables_Mode = 'CREATE';
+    EndIf
+    ;
+
+	If 'CLEAN' = Upper(sGenerateColorVariables_Mode) then
+    	Let sGenerateColorVariables_Mode = 'CLEAN';
+    EndIf
+    ;
+
+	// Trace sGenerateColorVariables_Mode $(sGenerateColorVariables_Mode);
+    
+	If Len(sQVDBaseName) < 7 then
+    	Let sQVDBaseName = 'lib://PM_QVD';
+    EndIf
+    ;
+
+    tmpColors:
+    CrossTable(ColorType, ColorValue)
+    LOAD
+        "Business name" as ColorName,
+        D60,
+        D40,
+        D20,
+        Base,
+        L20,
+        L40,
+        L60,
+        L80
+    FROM
+        [$(sQVDBaseName)/QVS/QLib/Visualizations/Colors.xlsx] (ooxml, embedded labels, table is Colors)
+    Where
+        Len("Business name") > 0
+    ;
+
+    CrossTable(ColorType, ColorValue)
+    LOAD
+        "Color name" as ColorName,
+        D60,
+        D40,
+        D20,
+        Base,
+        L20,
+        L40,
+        L60,
+        L80
+    FROM
+        [$(sQVDBaseName)/QVS/QLib/Visualizations/Colors.xlsx] (ooxml, embedded labels, table is Colors)
+    Where
+        Len("Color name") > 0
+    ;
+
+    CrossTable(ColorType, ColorValue)
+    LOAD
+        "Business name" as ColorName,
+        Primary,
+        Secondary,
+        "Blue",
+        "Green",
+        Orange,
+        "Red",
+        "Black"
+    FROM
+        [lib://PM_QVD/QVS/QLib/Visualizations/Colors.xlsx] (ooxml, embedded labels, table is Bg)
+    Where
+        Len("Business name") > 0
+    ;
+
+    Colors:
+    Load
+        ColorName as "Color name"
+        , ColorType as "Color Type"
+        , '#' & Text(Upper(ColorValue)) as "Color Value"
+    Resident tmpColors;
+
+    Drop Table tmpColors;
+
+    For sGenerateColorVariables_I = 0 to NoOfRows('Colors') - 1
+		Let sGenerateColorVariables_ColorName = Replace(Trim(Peek('Color name', sGenerateColorVariables_I, 'Colors')), ' ', '');
+        Let sGenerateColorVariables_ColorType = Replace(Trim(Peek('Color Type', sGenerateColorVariables_I, 'Colors')), ' ', '');
+        Let sGenerateColorVariables_ColorValue = Replace(Trim(Peek('Color Value', sGenerateColorVariables_I, 'Colors')), ' ', '');
+        
+        // Trace sGenerateColorVariables_ColorName $(sGenerateColorVariables_ColorName) | sGenerateColorVariables_ColorType $(sGenerateColorVariables_ColorType) | sGenerateColorVariables_ColorValue $(sGenerateColorVariables_ColorValue);
+        If 'Base' = sGenerateColorVariables_ColorType then
+        	Let sGenerateColorVariables_ColorType = '';
+        EndIf
+        ;
+        if 'CREATE' = sGenerateColorVariables_Mode then
+        	Let v$(sGenerateColorVariables_ColorName)$(sGenerateColorVariables_ColorType) = '$(sGenerateColorVariables_ColorValue)';
+        Else
+        	Let v$(sGenerateColorVariables_ColorName)$(sGenerateColorVariables_ColorType)=;
+        End If
+    Next sGenerateColorVariables_I
+	;
+ 
+	if sGenerateColorVariables_CleanupData then
+		Drop Table Colors;
+	EndIf
+	;
+    
+    sGenerateColorVariables_I=;
+    sGenerateColorVariables_ColorName=;
+    sGenerateColorVariables_ColorType=;
+    sGenerateColorVariables_ColorValue=;
+    sGenerateColorVariables_Mode=;
+	sGenerateColorVariables_CleanupData=;
+EndSub
+;

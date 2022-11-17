@@ -1,0 +1,13 @@
+/*
+	ListTables procedure lists all the existing table names vie Trace
+*/
+Sub ListTables
+    For sListTables_I = 0 to NoOfTables() - 1
+    	Let sListTables_TableName = TableName(sListTables_I);
+        Trace Table $(sListTables_TableName) (index $(sListTables_I));
+    Next sListTables_I
+    ;
+    sListTables_TableName=;
+    sListTables_I=;
+EndSub
+;

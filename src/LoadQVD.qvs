@@ -1,6 +1,6 @@
 /*
 	Loads the specified QVD file $(pLoadQVD_FileName) into Qlik table
-	in the $(pLoadQVD_QlikTableName), if specified, otherwise, the QVW file
+	in the $(pLoadQVD_QlikTableName), if specified, otherwise, the QVD file
 	name is used as the table name.
 	Existing Qlik table can either be replaced (bydefault) or added,
 	depending of the mode.
@@ -11,6 +11,8 @@
 	 - @pLoadQVD_LoadMode - load mode:
 		- r or R - replace (default)
 		- a or A - append (concatenate)
+		- j/lj or J/LJ - left join
+		- otherwise, the loading is not performed
 
 	Usage sample:
 		Call LoadQVD('$(sDestinationFile)', 'tmpData');
@@ -21,37 +23,50 @@ Sub LoadQVD(pLoadQVD_FileName, pLoadQVD_QlikTableName, pLoadQVD_LoadMode)
 	if $(FileExists($(pLoadQVD_FileName))) then
 		// Get table name
 		If Len(pLoadQVD_QlikTableName) < 1 then
-			pLoadQVD_QlikTableName
+			Let pLoadQVD_QlikTableName
 				= SubField(SubField(pLoadQVD_FileName, '/', -1), '.', 1);
 		End If
+		;
 
 		// Get mode - A is only possible if the table does already exist
 		pLoadQVD_LoadMode = Upper(pLoadQVD_LoadMode);
 		If Len(pLoadQVD_LoadMode) < 1 then
 			pLoadQVD_LoadMode = 'R';
-		ElseIf 'A' = pLoadQVD_LoadMode and IsNull(TableNumber('$(pLoadQVD_QlikTableName)')) then
+		ElseIf 'R' <> pLoadQVD_LoadMode and IsNull(TableNumber('$(pLoadQVD_QlikTableName)')) then
 			pLoadQVD_LoadMode = 'R';
 		End If
+		;
 		
 		// Check whether table exists and should the table be replaced or not
 		If TableNumber('$(pLoadQVD_QlikTableName)') >=0 and 'R' = pLoadQVD_LoadMode then
 			Trace [LoadQVD] Dropping the table: $(pLoadQVD_QlikTableName);
 			Drop Table [$(pLoadQVD_QlikTableName)];
 		End If
+		;
 
 		// Get table name clause
 		If 'R' = pLoadQVD_LoadMode then
 			pLoadQVD_QlikTableName = '[$(pLoadQVD_QlikTableName)]:';
 		ElseIf 'A' = pLoadQVD_LoadMode then
 			pLoadQVD_QlikTableName = 'Concatenate([$(pLoadQVD_QlikTableName)])';
+		ElseIf 'LJ' = pLoadQVD_LoadMode then
+			pLoadQVD_QlikTableName = 'Left Join([$(pLoadQVD_QlikTableName)])';
+		Else
+			// Make table name empty in order to avoid unsupported load modes
+			pLoadQVD_QlikTableName = '';
 		End If
+		;
 
-		// Load the QVD in to the table
-		$(pLoadQVD_QlikTableName)
-		Load * From [$(pLoadQVD_FileName)] (qvd);
+		if Len(pLoadQVD_QlikTableName) > 0 then
+			// Load the QVD into the table
+			$(pLoadQVD_QlikTableName)
+			Load * From [$(pLoadQVD_FileName)] (qvd);
+		End If
+		;
 	Else
 		Trace [LoadQVD] There is no file: $(pLoadQVD_FileName);
 	End If
+	;
 	
   	pLoadQVD_FileName=;
     pLoadQVD_QlikTableName=;

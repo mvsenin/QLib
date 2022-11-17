@@ -1,0 +1,21 @@
+/*
+	AddMonth adds a number of months to the specified variable formatted as YYYYMM
+    
+    Parameters:
+    	@inVarName - the variabel name
+        @inMonths - number of months to be added, including negative ones
+        
+    Usage sample:
+		Call AddMonth('sYYYYMM', -12);
+*/
+Sub AddMonth(inVarName, inMonths)
+	if (Len($(inVarName)) = 6) and (Len(inMonths) > 0) and (0 <> inMonths) then
+		Let sAddMonth_Y = Left($(inVarName), 4);
+        Let sAddMonth_M = Floor(Right($(inVarName), 2));
+        Let $(inVarName) = Year(AddMonths(MakeDate(sAddMonth_Y, sAddMonth_M), inMonths)) * 100 + Month(AddMonths(MakeDate(sAddMonth_Y, sAddMonth_M), inMonths));
+        sAddMonth_Y=;
+        sAddMonth_M=;
+        sAddMonth_Res=;
+    EndIf
+EndSub
+;

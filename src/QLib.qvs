@@ -1,5 +1,4 @@
-// QLib folder connection
-Let QLibBasePath = 'lib://QVD';
+Let QLibBasePath = 'lib://PM_QVD/QVS/QLib';
 
 /*
 	Data Profiling
@@ -11,6 +10,7 @@ $(Must_Include=$(QLibBasePath)/CreateDataProfiling.qvs);
 */
 $(Must_Include=$(QLibBasePath)/DropTable.qvs);
 $(Must_Include=$(QLibBasePath)/ShowNoOfRows.qvs);
+$(Must_Include=$(QLibBasePath)/ListTables.qvs);
 
 /*
 	File operations
@@ -19,6 +19,7 @@ $(Must_Include=$(QLibBasePath)/FileExists.qvs);
 $(Must_Include=$(QLibBasePath)/NewerFile.qvs);
 $(Must_Include=$(QLibBasePath)/StoreQVD.qvs);
 $(Must_Include=$(QLibBasePath)/LoadQVD.qvs);
+$(Must_Include=$(QLibBasePath)/StoreTable.qvs);
 
 /*
 	Logging
@@ -35,4 +36,23 @@ $(Must_Include=$(QLibBasePath)/vQlikServerURL.qvs);
 */
 $(Must_Include=$(QLibBasePath)/QLibCleanUp.qvs);
 
-QLibBasePath=;
+/*
+	Colors
+*/
+
+$(Must_Include=$(QLibBasePath)/GenerateColorVariables.qvs);
+
+/*
+	Date processing
+*/
+
+$(Must_Include=$(QLibBasePath)/AddMonth.qvs);
+
+/*
+	Data Loader
+*/
+
+$(Must_Include=$(QLibBasePath)/RunDataLoader.qvs);
+$(Must_Include=$(QLibBasePath)/Cron.qvs);
+
+// QLibBasePath=;

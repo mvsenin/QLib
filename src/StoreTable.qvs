@@ -1,0 +1,60 @@
+/*
+	Stores Qlik table $(pStoreTable_QlikTableName) as a file $(pStoreTable_FileName)
+	with the specified format $(pStoreTable_FileFormat) which is either qvd or txt.
+
+    Parameters:
+     - @pStoreTable_QlikTableName - Qlik table name
+     - @pStoreTable_FileName - file full path
+	 - @pStoreTable_FileFormat - file format
+	 - @pStoreTable_NoDrop - flag for drop operation, it's True() by default,
+                           otherwise it's False()
+	 - @pStoreTable_ZeroRowStore - flag for zero row tables, it's True() by
+                                 default, otherwise it's False()
+
+	Usage sample:
+		Call StoreTable('tmpData', '$(sDestinationFile)', 'txt');
+*/
+Sub StoreTable(pStoreTable_QlikTableName, pStoreTable_FileName, pStoreTable_FileFormat, pStoreTable_NoDrop, pStoreTable_ZeroRowStore)
+
+	// Store zero row tables by default, but check pStoreTable_ZeroRowStore
+	if IsNull(pStoreTable_ZeroRowStore) then
+		pStoreTable_ZeroRowStore = True()
+	ElseIf pStoreTable_ZeroRowStore <> True() Then
+		pStoreTable_ZeroRowStore = False()
+	End If
+	
+	if IsNull(pStoreTable_FileFormat) or Index(Lower(pStoreTable_FileFormat), 'qvd') >= 1 then
+		pStoreTable_FileFormat = 'qvd';
+	ElseIf Index(Lower(pStoreTable_FileFormat), 'txt') < 1 then
+		pStoreTable_FileFormat = 'txt';
+	EndIf
+
+	// Check whether table exists and should the empty table be stored
+	if TableNumber('$(pStoreTable_QlikTableName)')>=0 and (pStoreTable_ZeroRowStore or NoOfRows('$(pStoreTable_QlikTableName)') > 0) then
+		// Drop tables by default, but check the pStoreTable_NoDrop
+		if IsNull(pStoreTable_NoDrop) then
+			pStoreTable_NoDrop = True()
+		ElseIf pStoreTable_NoDrop <> True() Then
+			pStoreTable_NoDrop = False()
+		End If
+
+		if $(FileExists($(pStoreTable_FileName))) then
+			Trace [StoreTable] Rewriting: $(pStoreTable_FileName);
+		Else
+			Trace [StoreTable] Storing: $(pStoreTable_FileName);
+		End If
+
+		Store [$(pStoreTable_QlikTableName)] into [$(pStoreTable_FileName)] ($(pStoreTable_FileFormat));
+		
+		// Drop if needed
+		if pStoreTable_NoDrop then
+			Drop Table [$(pStoreTable_QlikTableName)];
+		End If
+	End If
+	
+    pStoreTable_QlikTableName=;
+  	pStoreTable_FileName=;
+	pStoreTable_FileFormat=;
+	pStoreTable_NoDrop=;
+	pStoreTable_ZeroRowStore=;
+EndSub;
