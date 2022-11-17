@@ -8,6 +8,7 @@ QLib functional scripting library implements the following functionality:
 - Clean up for QLib variables
 - Color variables creation
 - Data Loading automation with Cron-like logic
+- Date Operations
 
 # Special files
 1. make.bat - generates QLibFull.qvs with full text of the library
@@ -155,6 +156,7 @@ QLib functional scripting library implements the following functionality:
 	Description:
 		GenerateColorVariables - loads color codes and generates variables
 
+	Parameters:
 		@sGenerateColorVariables_Mode - generation mode, case insensitive:
     		- Create (or empty) - generate color variables
         	- Clean - clean color variables
@@ -184,3 +186,17 @@ QLib functional scripting library implements the following functionality:
 
 	Usage sample:
 		Call RunDataLoader('lib://Source Folder/Source A');
+
+## Date Operations
+
+### AddMonth() method
+
+	Description:
+		AddMonth adds a number of months to the specified variable formatted as YYYYMM
+
+	Parameters:
+		@inVarName - the variabel name
+		@inMonths - number of months to be added, including negative ones
+
+	Usage sample:
+		Call AddMonth('sYYYYMM', -12);
