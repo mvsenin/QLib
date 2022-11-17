@@ -6,6 +6,8 @@ QLib functional scripting library implements the following functionality:
 - Logging
 - Qlik server URLs extraction
 - Clean up for QLib variables
+- Color variables creation
+- Data Loading automation with Cron-like logic
 
 # Special files
 1. make.bat - generates QLibFull.qvs with full text of the library
@@ -145,3 +147,40 @@ QLib functional scripting library implements the following functionality:
 
 	Usage sample:
 		Call QLibCleanUp;
+
+## Color Variables:
+
+### GenerateColorVariables() method
+
+	Description:
+		GenerateColorVariables - loads color codes and generates variables
+
+		@sGenerateColorVariables_Mode - generation mode, case insensitive:
+    		- Create (or empty) - generate color variables
+        	- Clean - clean color variables
+
+	Usage sample:
+		Call GenerateColorVariables;
+		Call GenerateColorVariables('clean');
+
+## Data Loader
+
+### RunDataLoader() method
+
+	Description
+		RunDataLoader procedure initiates massive data loading according to settings
+    		provided in the "Data Loader Configuration.xlsx" configuration file, stored
+    		under the "Data Loader" folder of the source folder
+    
+    	Dependencies:
+		Trace.qvs
+		Cron.qvs
+		DropTables.qvs
+		StoreQVD.qvs
+		
+	Parameters:
+		@sRunDataLoader_SourceFolder - source folder name
+		@sRunDataLoader_Queue - queue identifier
+
+    Usage sample:
+    	Call RunDataLoader('lib://Source Folder/Source A');
