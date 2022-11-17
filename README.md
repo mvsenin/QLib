@@ -148,7 +148,7 @@ QLib functional scripting library implements the following functionality:
 	Usage sample:
 		Call QLibCleanUp;
 
-## Color Variables:
+## Color Variables
 
 ### GenerateColorVariables() method
 
@@ -167,10 +167,10 @@ QLib functional scripting library implements the following functionality:
 
 ### RunDataLoader() method
 
-	Description
+	Description:
 		RunDataLoader procedure initiates massive data loading according to settings
-    		provided in the "Data Loader Configuration.xlsx" configuration file, stored
-    		under the "Data Loader" folder of the source folder
+		provided in the "Data Loader Configuration.xlsx" configuration file, stored
+		under the "Data Loader" folder of the source folder
     
     	Dependencies:
 		Trace.qvs
@@ -182,5 +182,5 @@ QLib functional scripting library implements the following functionality:
 		@sRunDataLoader_SourceFolder - source folder name
 		@sRunDataLoader_Queue - queue identifier
 
-    Usage sample:
-    	Call RunDataLoader('lib://Source Folder/Source A');
+	Usage sample:
+		Call RunDataLoader('lib://Source Folder/Source A');
