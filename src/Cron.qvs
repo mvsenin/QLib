@@ -64,3 +64,10 @@ Set vCronWDay = Timestamp(Timestamp#(
                 if(SubField('$1', ' ', 4) = '*', vCronMonth, SubField('$1', ' ', 4)) & ' ? ' &
                 vCronYear
                 ,'mm hh DD M ? YYYY'));
+
+vCronMinute=;
+vCronHour=;
+vCronDay=;
+vCronMonth=;
+vCronWeekDay=;
+vCronYear=;
