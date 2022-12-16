@@ -7,4 +7,10 @@
 Sub QLibCleanUp
 	FileExists=;
 	NewerFile=;
+	vCronMinute=;
+	vCronHour=;
+	vCronDay=;
+	vCronMonth=;
+	vCronYear=;
+	vCronWeekDay=;
 EndSub;
