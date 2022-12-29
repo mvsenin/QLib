@@ -23,7 +23,6 @@
 // - поддержка сохранения загруженной таблицы по периодам их поля LoadAndStoreField
 // - поддержка Full loading по дате sFullExtract_StartDate
 // - поддержка REST и web
-// - поддержка ?FieldReduction
 
 Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 	if IsNull(sRunDataLoader_Queue) then
@@ -149,8 +148,9 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
                 Let sRunDataLoader_WhereIncremental = Upper(Peek('WhereIncremental', sRunDataLoader_Table, 'Tables'));
                 Let sRunDataLoader_StoringMode = Upper(Peek('StoringMode', sRunDataLoader_Table, 'Tables'));
                 Let sRunDataLoader_LoadAndStoreField = Upper(Peek('LoadAndStoreField', sRunDataLoader_Table, 'Tables'));
+				Let sRunDataLoader_FieldReduction = Upper(Peek('?FieldReduction', sRunDataLoader_Table, 'Tables'));
 				Let sRunDataLoader_Select = Upper(Peek('Select', sRunDataLoader_Table, 'Tables'));
-                
+
                 // Задать имя выходного файла
                 Let sRunDataLoader_QVDName = '$(sRunDataLoader_SourceFolder)/$(sRunDataLoader_SchemeName)/';
 				
@@ -158,6 +158,60 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 				Let sRunDataLoader_QVDName_tmp = Trim(Peek('QVD Name', sRunDataLoader_Table, 'Tables'));
 				if Len(sRunDataLoader_QVDName_tmp) <= 0 then
 					sRunDataLoader_QVDName_tmp = sRunDataLoader_TableName;
+				EndIf
+				;
+				
+				// Сформировать выражение для LOAD и SELECT со списком полей или "*"
+				Let sRunDataLoader_LoadFieldList = '';
+				Let sRunDataLoader_SelectFieldList = '';
+				
+				if Len(sRunDataLoader_FieldReduction) > 0 then
+					FieldList:
+					Load
+						Replace(OriginalFieldName, '"', '') as OriginalFieldName
+						, Replace(NewFieldName, '"', '') as NewFieldName
+					FROM [$(sRunDataLoader_ConfigFileName)] (ooxml, embedded labels, table is [$(sRunDataLoader_FieldReduction)])
+					Where
+						?Active = 1
+					;
+					
+					If NoOfRows('FieldList') > 0 then
+						For sRunDataLoader_FieldIndex = 0 to NoOfRows('FieldList') - 1
+							Let sRunDataLoader_OriginalFieldName = Peek('OriginalFieldName', sRunDataLoader_FieldIndex, 'FieldList');
+							Let sRunDataLoader_NewFieldName = Peek('NewFieldName', sRunDataLoader_FieldIndex, 'FieldList');
+
+							if Len(sRunDataLoader_LoadFieldList) > 0 then
+								Let sRunDataLoader_LoadFieldList = sRunDataLoader_LoadFieldList & chr(10) & ', ';
+							EndIf
+							;
+
+							if Len(sRunDataLoader_SelectFieldList) > 0 then
+								Let sRunDataLoader_SelectFieldList = sRunDataLoader_SelectFieldList & chr(10) & ', ';
+							EndIf
+							;
+							
+							if Len(sRunDataLoader_OriginalFieldName) > 0 then
+								Let sRunDataLoader_LoadFieldList = sRunDataLoader_LoadFieldList & '"$(sRunDataLoader_OriginalFieldName)"';
+								if Len(sRunDataLoader_NewFieldName) > 0 then
+									Let sRunDataLoader_LoadFieldList = sRunDataLoader_LoadFieldList & ' as "$(sRunDataLoader_NewFieldName)"';
+								EndIf
+								;
+								Let sRunDataLoader_SelectFieldList = sRunDataLoader_SelectFieldList & '"$(sRunDataLoader_OriginalFieldName)"';
+							EndIf
+							;
+
+						Next sRunDataLoader_FieldIndex
+						;
+					Else
+						Let sRunDataLoader_LoadFieldList = '*';
+						Let sRunDataLoader_SelectFieldList = '*';						
+					EndIf
+					;
+
+					Drop Table FieldList;
+				Else
+					Let sRunDataLoader_LoadFieldList = '*';
+					Let sRunDataLoader_SelectFieldList = '*';
 				EndIf
 				;
 				
@@ -199,7 +253,7 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 					// Trace FileName: $(sRunDataLoader_QVDName_tmp) | FileTime: $(sRunDataLoader_FileTime) | MDay: $(sRunDataLoader_CronMDay) | WDay: $(sRunDataLoader_CronWDay);
 				EndIf
 				;
-				
+			
 				// Проверить условия по Cron, если (а) оно задано и файла нет ИЛИ (б) оно не задано ИЛИ (в) время дня месяца ИЛИ (в) дня недели по Corn больше времени файла
 				if (Len(sRunDataLoader_Cron) > 0 and Len(sRunDataLoader_FileTime) = 0) or (Len(sRunDataLoader_Cron) = 0) or (sRunDataLoader_CronMDay > 0 and sRunDataLoader_CronMDay > sRunDataLoader_FileTime) or (sRunDataLoader_CronWDay > 0 and sRunDataLoader_CronWDay > sRunDataLoader_FileTime) then
 					Trace Initiate data loading...;
@@ -220,8 +274,11 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 							Trace Loading and storing $(sRunDataLoader_QVDName)...;
 							TableData:
 			//                 Load Null() as F AutoGenerate 1; // DBG
+							Load
+								$(sRunDataLoader_LoadFieldList)
+							;
 							SQL Select
-								*
+								$(sRunDataLoader_SelectFieldList)
 			//                     count(*)
 							From
 								$(vRunDataLoader_From)
@@ -288,8 +345,11 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 								Trace Loading and storing $(sRunDataLoader_QVDName_Final)...;
 								TableData:
 				//                 Load Null() as F AutoGenerate 1; // DBG
+								Load
+									$(sRunDataLoader_LoadFieldList)
+								;
 								SQL Select
-									*
+									$(sRunDataLoader_SelectFieldList)
 				//                     count(*)
 								From
 									$(vRunDataLoader_From)
@@ -370,5 +430,11 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 	sRunDataLoader_FileTime=;
 	sRunDataLoader_Queue=;
 	vRunDataLoader_From=;
+	sRunDataLoader_FieldReduction=;
+	sRunDataLoader_LoadFieldList=;
+	sRunDataLoader_SelectFieldList=;
+	sRunDataLoader_FieldIndex=;
+	sRunDataLoader_OriginalFieldName=;
+	sRunDataLoader_NewFieldName=;
 EndSub
 ;
