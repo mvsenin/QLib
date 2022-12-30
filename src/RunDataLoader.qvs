@@ -20,8 +20,7 @@
 // 2022-09-29: ToDo:
 // - проверка периодов по Cron, пока только точное время
 // - поддержка inctemental loading
-// - поддержка сохранения загруженной таблицы по периодам их поля LoadAndStoreField
-// - поддержка Full loading по дате sFullExtract_StartDate
+// - поддержка сохранения загруженной таблицы по периодам из поля LoadAndStoreField
 // - поддержка REST и web
 
 Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
@@ -72,7 +71,7 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 	
 	Call DropTables('Variables');
 
-	// Default variable settings, in case there are nothing is provide in the config. file
+	// Default variable settings, in case there is nothing provided in the config. file
 	If '' = sFullExtract_StartDate then
 		// Load last two years in 'Full loading mode' by default
 		Let sFullExtract_StartDate = floor(AddMonths(Today(), -12));
@@ -142,6 +141,7 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
             
             For sRunDataLoader_Table = 0 to NoOfRows('Tables') - 1
             	Let sRunDataLoader_TableName = Trim(Peek('Table Name', sRunDataLoader_Table, 'Tables'));
+				Let sRunDataLoader_QVDName_tmp = Trim(Peek('QVD Name', sRunDataLoader_Table, 'Tables'));
                 Let sRunDataLoader_StoreInSubFolder = Peek('?StoreInSubFolder', sRunDataLoader_Table, 'Tables');
 				Let sRunDataLoader_Cron = Upper(Peek('Cron', sRunDataLoader_Table, 'Tables'));
                 Let sRunDataLoader_LoadMode = Upper(Peek('LoadMode', sRunDataLoader_Table, 'Tables'));
@@ -149,13 +149,13 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
                 Let sRunDataLoader_StoringMode = Upper(Peek('StoringMode', sRunDataLoader_Table, 'Tables'));
                 Let sRunDataLoader_LoadAndStoreField = Upper(Peek('LoadAndStoreField', sRunDataLoader_Table, 'Tables'));
 				Let sRunDataLoader_FieldReduction = Upper(Peek('?FieldReduction', sRunDataLoader_Table, 'Tables'));
+				Let sRunDataLoader_Where = Peek('Where', sRunDataLoader_Table, 'Tables');
 				Let sRunDataLoader_Select = Upper(Peek('Select', sRunDataLoader_Table, 'Tables'));
 
                 // Задать имя выходного файла
                 Let sRunDataLoader_QVDName = '$(sRunDataLoader_SourceFolder)/$(sRunDataLoader_SchemeName)/';
 				
 				// Взять имя QVD, если оно есть, если нет, то приравнять к имени таблицы
-				Let sRunDataLoader_QVDName_tmp = Trim(Peek('QVD Name', sRunDataLoader_Table, 'Tables'));
 				if Len(sRunDataLoader_QVDName_tmp) <= 0 then
 					sRunDataLoader_QVDName_tmp = sRunDataLoader_TableName;
 				EndIf
@@ -208,7 +208,7 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 					EndIf
 					;
 
-					Drop Table FieldList;
+					Call DropTables('FieldList');
 				Else
 					Let sRunDataLoader_LoadFieldList = '*';
 					Let sRunDataLoader_SelectFieldList = '*';
@@ -263,7 +263,7 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 					If ('F' = sRunDataLoader_LoadMode) then
 						// Сохранение полной таблицы
 						If 'F' = sRunDataLoader_StoringMode then
-							Let sRunDataLoader_Where = Peek('Where', sRunDataLoader_Table, 'Tables');
+							
 							if Len(sRunDataLoader_Where) > 0 then
 								Let sRunDataLoader_Where = 'WHERE $(sRunDataLoader_Where)';
 							Else
@@ -292,12 +292,12 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 						ElseIf Len(sRunDataLoader_LoadAndStoreField) > 0 then
 							Trace TBD >> Storing loaded table per periods...;
 						ElseIf Len(sRunDataLoader_StoringMode) = 0 then
-							Trace There is no loading & storing mode provided in the "LoadAndStoreField" attribute for the table  "$(sRunDataLoader_TableName)";
+							Trace There is no loading & storing mode provided in the "StoringMode" attribute for the table  "$(sRunDataLoader_TableName)";
 						Else
 							Trace To store the table "$(sRunDataLoader_TableName)" in the "$(sRunDataLoader_StoringMode)" mode you need set the "LoadAndStoreField" attribute;
 						End If
 						;
-					// Partial loading stating from 
+					// Partial loading stating from
 					ElseIf 'P' = sRunDataLoader_LoadMode then
 						If (Len(sRunDataLoader_LoadAndStoreField)) > 0 and (Len(sRunDataLoader_WhereIncremental) > 0) then
 							// Пока загрузка только помесячная
@@ -369,7 +369,7 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 								EndIf
 							Loop
 						Else
-							Trace To load in the "$(sRunDataLoader_LoadMode)" mode you need to provide conditions in the "WhereIncremental" attribute and filed name in the "LoadAndStoreField" attribute;
+							Trace To load in the "$(sRunDataLoader_LoadMode)" mode you need to provide conditions in the "WhereIncremental" attribute and field name in the "LoadAndStoreField" attribute;
 						End If
 						;
 					ElseIf 'I' = sRunDataLoader_LoadMode then
