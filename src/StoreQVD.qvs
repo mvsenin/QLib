@@ -6,8 +6,8 @@
      - @pStoreQVD_FileName - file full path
 	 - @pStoreQVD_NoDrop - flag for drop operation, it's True() by default,
                            otherwise it's False()
-	 - @pStoreQVD_ZeroRowStore - flag for zero row tables, it's True() by
-                                 default, otherwise it's False()
+	 - @pStoreQVD_ZeroRowStore - flag for zero row tables, it's False() by
+                                 default, otherwise it's True()
 
 	Usage sample:
 		Call StoreQVD('tmpData', '$(sDestinationFile)');
@@ -16,21 +16,23 @@ Sub StoreQVD(pStoreQVD_QlikTableName, pStoreQVD_FileName, pStoreQVD_NoDrop, pSto
 
 	// Store zero row tables by default, but check pStoreQVD_ZeroRowStore
 	if IsNull(pStoreQVD_ZeroRowStore) then
-		pStoreQVD_ZeroRowStore = True()
-	ElseIf pStoreQVD_ZeroRowStore <> True() Then
-		pStoreQVD_ZeroRowStore = False()
+		pStoreQVD_ZeroRowStore = False();
+	ElseIf pStoreQVD_ZeroRowStore <> False() Then
+		pStoreQVD_ZeroRowStore = True();
 	End If
+    ;
 
 	// Check whether table exists and should the empty table be stored
-	if TableNumber('$(pStoreQVD_QlikTableName)')>=0
+	if TableNumber('$(pStoreQVD_QlikTableName)')>=0 then
 
 		if(pStoreQVD_ZeroRowStore or NoOfRows('$(pStoreQVD_QlikTableName)') > 0) then
 			// Drop tables by default, but check the pStoreQVD_NoDrop
 			if IsNull(pStoreQVD_NoDrop) then
-				pStoreQVD_NoDrop = True()
+				pStoreQVD_NoDrop = True();
 			ElseIf pStoreQVD_NoDrop <> True() Then
-				pStoreQVD_NoDrop = False()
+				pStoreQVD_NoDrop = False();
 			End If
+			;
 
 			if $(FileExists($(pStoreQVD_FileName))) then
 				Trace [StoreQVD] Rewriting: $(pStoreQVD_FileName);
@@ -39,17 +41,23 @@ Sub StoreQVD(pStoreQVD_QlikTableName, pStoreQVD_FileName, pStoreQVD_NoDrop, pSto
 			End If
 
 			Store [$(pStoreQVD_QlikTableName)] into [$(pStoreQVD_FileName)] (qvd);
+		Else
+			Trace [StoreQVD] Warning: $(pStoreQVD_FileName) is empty and not stored, please use the 4th True/False argument.;
 		End If
+        ;
 
 		// Drop if needed
 		if pStoreQVD_NoDrop then
 			Drop Table [$(pStoreQVD_QlikTableName)];
 		End If
+		;
 
 	End If
+	;
 	
     pStoreQVD_QlikTableName=;
   	pStoreQVD_FileName=;
 	pStoreQVD_NoDrop=;
 	pStoreQVD_ZeroRowStore=;
-EndSub;
+EndSub
+;

@@ -5,7 +5,7 @@
     Parameters:
      - @pStoreTable_QlikTableName - Qlik table name
      - @pStoreTable_FileName - file full path
-	 - @pStoreTable_FileFormat - file format
+	 - @pStoreTable_FileFormat - file format, it's 'qvd' by default
 	 - @pStoreTable_NoDrop - flag for drop operation, it's True() by default,
                            otherwise it's False()
 	 - @pStoreTable_ZeroRowStore - flag for zero row tables, it's True() by

@@ -1,0 +1,58 @@
+/*
+	Performs string capitalization as per one of the for modes
+	
+	Parameters:
+    	@pCapitalizeStr_StrVarName - string with script variable name
+		@p_Mode - capitalization mode:
+        	U1L - very first letter to upper, rest to lower
+            U1W - first letter of each word to upper, rest to lower (default)
+            UP - all to upper
+            LO - all to lower
+    Usage sample:
+		Let str = 'ABC  DEF ghi';
+		Call CapitalizeStr('str', 'U1w');
+*/
+
+Sub CapitalizeStr(pCapitalizeStr_StrVarName, pCapitalizeStr_Mode)
+	If not IsNull(pCapitalizeStr_StrVarName) then
+        If IsNull(pCapitalizeStr_Mode) then
+            Let pCapitalizeStr_Mode = 'U1W';
+        Else
+        	Let pCapitalizeStr_Mode = Upper(pCapitalizeStr_Mode);
+        EndIf
+        ;
+		
+        Let sCapitalizeStr_Str = '';
+        
+        If pCapitalizeStr_Mode = 'U1L' then
+            Let sCapitalizeStr_Str = Upper(Left($(pCapitalizeStr_StrVarName), 1)) & Lower(Right($(pCapitalizeStr_StrVarName), Len($(pCapitalizeStr_StrVarName))-1));
+        ElseIf pCapitalizeStr_Mode = 'U1W' then
+            For sCapitalizeStr_I = 1 to SubStringCount($(pCapitalizeStr_StrVarName), ' ') + 1
+                Let sCapitalizeStr_Tmp = Trim(SubField($(pCapitalizeStr_StrVarName), ' ', sCapitalizeStr_I));
+                if Len(sCapitalizeStr_Tmp) > 0 then
+                    Let sCapitalizeStr_Tmp = Upper(Left(sCapitalizeStr_Tmp, 1)) & Lower(Right(sCapitalizeStr_Tmp, Len(sCapitalizeStr_Tmp)-1));
+                    Let sCapitalizeStr_Str = sCapitalizeStr_Str & if(Len(sCapitalizeStr_Str) > 0, ' ', '') & sCapitalizeStr_Tmp;
+                EndIf
+                ;
+            Next sCapitalizeStr_I
+            ;
+        ElseIf pCapitalizeStr_Mode = 'UP' then
+        	Let sCapitalizeStr_Str = Upper($(pCapitalizeStr_StrVarName));
+        ElseIf pCapitalizeStr_Mode = 'LO' then
+        	Let sCapitalizeStr_Str = Lower($(pCapitalizeStr_StrVarName));
+        End If
+        ;
+    else
+    	Trace [CapitalizeStr]: ERROR: No variable name specified...;
+	EndIf
+    ;
+    
+    Let $(pCapitalizeStr_StrVarName) = sCapitalizeStr_Str;
+    
+    pCapitalizeStr_StrVarName=;
+    pCapitalizeStr_Mode=;
+    sCapitalizeStr_I=;
+    sCapitalizeStr_Str=;
+    sCapitalizeStr_Tmp=;
+EndSub
+;

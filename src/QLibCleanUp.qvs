@@ -1,4 +1,7 @@
 /*
+	2023-08-28 - added sQLibTimer and sQLibGlobalTimer for time diff output
+	2023-09-20 - added sQVDPathPrefix for getting app's version
+	
 	Clean up QLib variables
 
 	Usage sample:
@@ -7,10 +10,15 @@
 Sub QLibCleanUp
 	FileExists=;
 	NewerFile=;
+	MonthDiff=;
 	vCronMinute=;
 	vCronHour=;
 	vCronDay=;
 	vCronMonth=;
 	vCronYear=;
 	vCronWeekDay=;
+	sQLibTimer=;
+	sQLibGlobalTimer=;
+	sQLibTimeDiffFormat=;
+	sQVDPathPrefix=;
 EndSub;

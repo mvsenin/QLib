@@ -1,0 +1,11 @@
+/*
+	Calculates diff in months beetween two monthes formated as YYYYMM numbers
+
+    Parameters:
+     - @$1 - month #1
+	 - @$2 - month #2
+
+	Usage sample:
+		Let sNoOfMonthes = $(MonthDiff(202301, 202201));
+*/
+Set MonthDiff = (Div($1 - $2, 100)) * 12 + (Mod(Mod($1 - $2, 100), 88));

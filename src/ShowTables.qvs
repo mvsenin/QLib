@@ -1,0 +1,38 @@
+/*
+	Shows table list
+
+    Parameters:
+     - none
+
+	Usage sample:
+		 Call ShowTables;
+*/
+Sub ShowTables
+
+	Let sShowTables_TableName = '';
+    Let sShowTables_NoOfTables = NoOfTables();
+    
+    if sShowTables_NoOfTables > 0 then
+    
+        for sShowTables_Tables = 0 to sShowTables_NoOfTables - 1
+        
+        	if Len(sShowTables_TableName) > 0 then
+            	Let sShowTables_TableName = sShowTables_TableName & ', ';
+            EndIf
+            ;
+            Let sShowTables_TableName = sShowTables_TableName & TableName(sShowTables_Tables);
+
+        Next sShowTables_Tables
+        ;
+        
+        Trace [ShowTables]: $(sShowTables_TableName);
+    Else
+    	Trace [ShowTables]: No tables found.;
+    EndIf
+    ;
+
+    sShowTables_Tables=;
+    sShowTables_TableName=;
+    sShowTables_NoOfTables=;
+EndSub
+;

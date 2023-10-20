@@ -1,0 +1,44 @@
+/*
+	Shows table field list with separator
+
+    Parameters:
+     - @pShowFields_TableName - table name
+
+	Usage sample:
+		 Call ShowFields('MyFavoriteInMemoryTable');
+*/
+Sub ShowFields(pShowFields_TableName)
+	if not IsNull(pShowFields_TableName) then
+		Let sShowFields_FieldCnt = NoOfFields('$(pShowFields_TableName)');
+        Let sShowFields_FieldName = '';
+        if sShowFields_FieldCnt > 0 then
+        	for sShowFields_FieldIndex = 1 to sShowFields_FieldCnt
+            	if Len(sShowFields_FieldName) > 0 then
+                	Let sShowFields_FieldName = sShowFields_FieldName & '|';
+                EndIf
+                ;
+            	Let sShowFields_FieldName = sShowFields_FieldName & FieldName(sShowFields_FieldIndex, '$(pShowFields_TableName)');
+             Next sShowFields_FieldIndex
+            ;
+            if Len(sShowFields_FieldName) > 0 then
+            	Let sShowFields_FieldName = '[ShowFields]: Found field list in [$(pShowFields_TableName)] {'
+                							& chr(10) & sShowFields_FieldName & chr(10) & '}';
+                Trace $(sShowFields_FieldName);
+            Else
+            	Trace [ShowFields]: No fields found in [$(pShowFields_TableName)];
+            EndIf
+            ;
+        Else
+        	Trace [ShowFields]: no fields found for the [$(pShowFields_TableName)] table;
+        EndIf
+        ;
+    Else
+    	Trace [ShowFields]: no table name is specified.;
+    End If
+    ;
+    pShowFields_TableName=;
+    sShowFields_FieldCnt=;
+    sShowFields_FieldIndex=;
+    sShowFields_FieldName=;
+End Sub
+;

@@ -1,0 +1,38 @@
+/*
+	2023-09-20
+	
+	CopyFile copies source file to destination one
+	Parameters:
+		@pCopyFile_SourceFile - source file name with full path
+		@pCopyFile_DestinationFile - destination file name with full path
+	 
+	Usage sample:
+		Call CopyFile('$(sSourceFile)', '$(sDestinationFile)');
+*/
+Sub CopyFile(pCopyFile_SourceFile, pCopyFile_DestinationFile)
+
+	If Lower(pCopyFile_SourceFile) like 'lib://*' and Lower(pCopyFile_DestinationFile) like 'lib://*' then
+        If $(FileExists($(pCopyFile_SourceFile))) then
+        
+            Trace Copying [$(pCopyFile_SourceFile)] to [$(pCopyFile_DestinationFile)]...;
+            
+        	CopyFile_SourceFile:
+            Load * From [$(pCopyFile_SourceFile)] (qvd);
+
+            Call StoreTable('CopyFile_SourceFile', '$(pCopyFile_DestinationFile)');
+            
+            Trace Copying complete.;
+            
+        End If
+        ;
+    Else
+    	Let sCopyFile_cr = chr(10);
+    	Trace Error source and/or destination path is specified, please check:$(sCopyFile_cr) - source: $(pCopyFile_SourceFile)$(sCopyFile_cr) - destination: $(pCopyFile_DestinationFile);
+    End If
+    ;
+    
+    pCopyFile_SourceFile=;
+    pCopyFile_DestinationFile=;
+    sCopyFile_cr=;
+End Sub
+;

@@ -1,4 +1,24 @@
-Let QLibBasePath = 'lib://PM_QVD/QVS/QLib';
+Let QLibBasePath = 'lib://<HERE_YOUR_FOLDER>';
+
+// 2023-08-28 - time diff format for output via the Trace() sub
+Let sQLibTimeDiffFormat = 'mm:ss';
+
+// 2023-09-20 - getting app's version into sQVDPathPrefix
+Let sQLibDocumentTitle = DocumentTitle();
+
+// Environment specific settings:
+// - It's assumed that the app name (title) contains the QLibAppVesionMarker with the following number
+Let QLibAppVesionMarker = ' TCO-';
+// - the root path by default
+Let sQVDPathPrefix = '/TCO';
+
+if sQLibDocumentTitle like '*$(QLibAppVesionMarker)*' then
+	Let sQVDPathPrefix = KeepChar(SubField(sQLibDocumentTitle, '$(QLibAppVesionMarker)', 2), '0123456789');
+    Let sQVDPathPrefix = if(Len(sQVDPathPrefix) > 0, '/' & Trim('$(QLibAppVesionMarker)') & sQVDPathPrefix, '');
+EndIf
+;
+
+sQLibDocumentTitle=;
 
 /*
 	Data Profiling
@@ -11,6 +31,9 @@ $(Must_Include=$(QLibBasePath)/CreateDataProfiling.qvs);
 $(Must_Include=$(QLibBasePath)/DropTable.qvs);
 $(Must_Include=$(QLibBasePath)/ShowNoOfRows.qvs);
 $(Must_Include=$(QLibBasePath)/ListTables.qvs);
+$(Must_Include=$(QLibBasePath)/DropFields.qvs);
+$(Must_Include=$(QLibBasePath)/ShowFields.qvs);
+$(Must_Include=$(QLibBasePath)/ShowTables.qvs);
 
 /*
 	File operations
@@ -20,6 +43,7 @@ $(Must_Include=$(QLibBasePath)/NewerFile.qvs);
 $(Must_Include=$(QLibBasePath)/StoreQVD.qvs);
 $(Must_Include=$(QLibBasePath)/LoadQVD.qvs);
 $(Must_Include=$(QLibBasePath)/StoreTable.qvs);
+$(Must_Include=$(QLibBasePath)/CopyFile.qvs);
 
 /*
 	Logging
@@ -47,6 +71,7 @@ $(Must_Include=$(QLibBasePath)/GenerateColorVariables.qvs);
 */
 
 $(Must_Include=$(QLibBasePath)/AddMonth.qvs);
+$(Must_Include=$(QLibBasePath)/MonthDiff.qvs);
 
 /*
 	Data Loader
@@ -54,5 +79,10 @@ $(Must_Include=$(QLibBasePath)/AddMonth.qvs);
 
 $(Must_Include=$(QLibBasePath)/RunDataLoader.qvs);
 $(Must_Include=$(QLibBasePath)/Cron.qvs);
+
+/*
+	String processing
+*/
+$(Must_Include=$(QLibBasePath)/CapitalizeStr.qvs);
 
 // QLibBasePath=;

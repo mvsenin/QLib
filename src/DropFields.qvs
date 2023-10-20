@@ -1,0 +1,34 @@
+/*
+	Drops fields from the table
+
+    Parameters:
+     - @pDropFields_FldList - list of field names delimited with comma
+	 - @pDropFields_Table - table name to remove fields from
+	Usage sample:
+		Call DropFields('ZZ, AB', 'MyTable');
+*/
+
+Sub DropFields(pDropFields_FldList, pDropFields_Table)
+	if not (IsNull(pDropFields_FldList) or IsNull(pDropFields_Table)) then
+    	Let sDropField_FldList = Trim(Replace('''$(pDropFields_FldList)''', ',', ''' , '''));
+    	For Each sDropFields_Fld in $(sDropField_FldList)
+			Let sDropFields_Fld = Trim(sDropFields_Fld);
+            Let sDropFields_FldIdx = FieldNumber('$(sDropFields_Fld)', '$(pDropFields_Table)');
+            if sDropFields_FldIdx > 0 then
+                Trace [DropFields]: Dropping field [$(sDropFields_Fld)] from [$(pDropFields_Table)] table;
+                Drop Fields [$(sDropFields_Fld)] From [$(pDropFields_Table)];
+            End If
+            ;
+        Next sDropFields_Fld
+        ;
+	Else
+    	Trace [DropFields]: Field list and/or table name is empty.;
+    End If
+    ;
+    sDropFields_FldIdx=;
+	sDropFields_Fld=;
+    pDropFields_FldList=;
+    pDropFields_Table=;
+    sDropField_FldList=;
+End Sub
+;

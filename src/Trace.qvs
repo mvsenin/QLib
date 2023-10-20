@@ -1,4 +1,6 @@
 /*
+	2023-08-28 - added sQLibTimer and sQLibGlobalTimerfor time diff output
+	
 	Traces message in the frame with indent
 
     Parameters:
@@ -13,24 +15,45 @@ Sub Trace(pTrace_msg, pTrace_Indent, pTrace_FrameSign)
 	// Space sign for Trace
 	Let sTrace_Space = chr(847);
     
-    if Alt(pTrace_Indent, 0) = 0 then
+    if Len(pTrace_Indent) = 0 then
     	Let pTrace_Indent = Repeat(' ', 4);
     Else
     	Let pTrace_Indent = Repeat(' ', Num(pTrace_Indent));
     EndIf
-
+	;
+	
     if IsNull(pTrace_FrameSign) or Len(pTrace_FrameSign) > 1 then
     	Let pTrace_FrameSign = Repeat('*', 50);
     Else
     	Let pTrace_FrameSign = Repeat(pTrace_FrameSign, 50);
     EndIf
-
+	;
+	
+	// Check and set time diff variables
+	Let sTrace_TimeDiff = '';
+	// If timer is started...
+	if Len(sQLibTimer) > 0 then
+		// Initializa global timer start variable
+		if Len(sQLibGlobalTimer) = 0 then
+			Let sQLibGlobalTimer = sQLibTimer;
+		endif
+		;
+		// Set time diff string
+		Let sTrace_TimeDiff = ' (' & Interval(Now() - sQLibTimer, '$(sQLibTimeDiffFormat)') &
+							  ' / ' & Interval(Now() - sQLibGlobalTimer, '$(sQLibTimeDiffFormat)') & ')';
+		
+		// Restart local timer
+		Let sQLibTimer = Now();
+	endif
+	;
+	
     Trace $(sTrace_Space)
 $(pTrace_Indent)$(pTrace_FrameSign)
-$(pTrace_Indent)$(pTrace_msg)
+$(pTrace_Indent)$(pTrace_msg)$(sTrace_TimeDiff)
 $(pTrace_Indent)$(pTrace_FrameSign);
 	pTrace_msg=;
 	sTrace_Space=;
     pTrace_Indent=;
     pTrace_FrameSign=;
+	sTrace_TimeDiff=;
 End Sub;

@@ -19,6 +19,100 @@ Sub AddMonth(inVarName, inMonths)
         sAddMonth_Res=;
     EndIf
 EndSub
+;/*
+	Performs string capitalization as per one of the for modes
+	
+	Parameters:
+    	@pCapitalizeStr_StrVarName - string with script variable name
+		@p_Mode - capitalization mode:
+        	U1L - very first letter to upper, rest to lower
+            U1W - first letter of each word to upper, rest to lower (default)
+            UP - all to upper
+            LO - all to lower
+    Usage sample:
+		Let str = 'ABC  DEF ghi';
+		Call CapitalizeStr('str', 'U1w');
+*/
+
+Sub CapitalizeStr(pCapitalizeStr_StrVarName, pCapitalizeStr_Mode)
+	If not IsNull(pCapitalizeStr_StrVarName) then
+        If IsNull(pCapitalizeStr_Mode) then
+            Let pCapitalizeStr_Mode = 'U1W';
+        Else
+        	Let pCapitalizeStr_Mode = Upper(pCapitalizeStr_Mode);
+        EndIf
+        ;
+		
+        Let sCapitalizeStr_Str = '';
+        
+        If pCapitalizeStr_Mode = 'U1L' then
+            Let sCapitalizeStr_Str = Upper(Left($(pCapitalizeStr_StrVarName), 1)) & Lower(Right($(pCapitalizeStr_StrVarName), Len($(pCapitalizeStr_StrVarName))-1));
+        ElseIf pCapitalizeStr_Mode = 'U1W' then
+            For sCapitalizeStr_I = 1 to SubStringCount($(pCapitalizeStr_StrVarName), ' ') + 1
+                Let sCapitalizeStr_Tmp = Trim(SubField($(pCapitalizeStr_StrVarName), ' ', sCapitalizeStr_I));
+                if Len(sCapitalizeStr_Tmp) > 0 then
+                    Let sCapitalizeStr_Tmp = Upper(Left(sCapitalizeStr_Tmp, 1)) & Lower(Right(sCapitalizeStr_Tmp, Len(sCapitalizeStr_Tmp)-1));
+                    Let sCapitalizeStr_Str = sCapitalizeStr_Str & if(Len(sCapitalizeStr_Str) > 0, ' ', '') & sCapitalizeStr_Tmp;
+                EndIf
+                ;
+            Next sCapitalizeStr_I
+            ;
+        ElseIf pCapitalizeStr_Mode = 'UP' then
+        	Let sCapitalizeStr_Str = Upper($(pCapitalizeStr_StrVarName));
+        ElseIf pCapitalizeStr_Mode = 'LO' then
+        	Let sCapitalizeStr_Str = Lower($(pCapitalizeStr_StrVarName));
+        End If
+        ;
+    else
+    	Trace [CapitalizeStr]: ERROR: No variable name specified...;
+	EndIf
+    ;
+    
+    Let $(pCapitalizeStr_StrVarName) = sCapitalizeStr_Str;
+    
+    pCapitalizeStr_StrVarName=;
+    pCapitalizeStr_Mode=;
+    sCapitalizeStr_I=;
+    sCapitalizeStr_Str=;
+    sCapitalizeStr_Tmp=;
+EndSub
+;/*
+	2023-09-20
+	
+	CopyFile copies source file to destination one
+	Parameters:
+		@pCopyFile_SourceFile - source file name with full path
+		@pCopyFile_DestinationFile - destination file name with full path
+	 
+	Usage sample:
+		Call CopyFile('$(sSourceFile)', '$(sDestinationFile)');
+*/
+Sub CopyFile(pCopyFile_SourceFile, pCopyFile_DestinationFile)
+
+	If Lower(pCopyFile_SourceFile) like 'lib://*' and Lower(pCopyFile_DestinationFile) like 'lib://*' then
+        If $(FileExists($(pCopyFile_SourceFile))) then
+        
+            Trace Copying [$(pCopyFile_SourceFile)] to [$(pCopyFile_DestinationFile)]...;
+            
+        	CopyFile_SourceFile:
+            Load * From [$(pCopyFile_SourceFile)] (qvd);
+
+            Call StoreTable('CopyFile_SourceFile', '$(pCopyFile_DestinationFile)');
+            
+            Trace Copying complete.;
+            
+        End If
+        ;
+    Else
+    	Let sCopyFile_cr = chr(10);
+    	Trace Error source and/or destination path is specified, please check:$(sCopyFile_cr) - source: $(pCopyFile_SourceFile)$(sCopyFile_cr) - destination: $(pCopyFile_DestinationFile);
+    End If
+    ;
+    
+    pCopyFile_SourceFile=;
+    pCopyFile_DestinationFile=;
+    sCopyFile_cr=;
+End Sub
 ;/*******************************************************************************
 	Data profiling procedure calculated data quality measures and KPIs
 
@@ -260,6 +354,39 @@ Set vCronWDay = Timestamp(Timestamp#(
                 if(SubField('$1', ' ', 4) = '*', vCronMonth, SubField('$1', ' ', 4)) & ' ? ' &
                 vCronYear
                 ,'mm hh DD M ? YYYY'));/*
+	Drops fields from the table
+
+    Parameters:
+     - @pDropFields_FldList - list of field names delimited with comma
+	 - @pDropFields_Table - table name to remove fields from
+	Usage sample:
+		Call DropFields('ZZ, AB', 'MyTable');
+*/
+
+Sub DropFields(pDropFields_FldList, pDropFields_Table)
+	if not (IsNull(pDropFields_FldList) or IsNull(pDropFields_Table)) then
+    	Let sDropField_FldList = Trim(Replace('''$(pDropFields_FldList)''', ',', ''' , '''));
+    	For Each sDropFields_Fld in $(sDropField_FldList)
+			Let sDropFields_Fld = Trim(sDropFields_Fld);
+            Let sDropFields_FldIdx = FieldNumber('$(sDropFields_Fld)', '$(pDropFields_Table)');
+            if sDropFields_FldIdx > 0 then
+                Trace [DropFields]: Dropping field [$(sDropFields_Fld)] from [$(pDropFields_Table)] table;
+                Drop Fields [$(sDropFields_Fld)] From [$(pDropFields_Table)];
+            End If
+            ;
+        Next sDropFields_Fld
+        ;
+	Else
+    	Trace [DropFields]: Field list and/or table name is empty.;
+    End If
+    ;
+    sDropFields_FldIdx=;
+	sDropFields_Fld=;
+    pDropFields_FldList=;
+    pDropFields_Table=;
+    sDropField_FldList=;
+End Sub
+;/*
 	Drops tables, if they exist
     Parameters:
      - @pDropTable_TableNames - list of Qlik table names delimited with comma
@@ -509,6 +636,16 @@ Sub LoadQVD(pLoadQVD_FileName, pLoadQVD_QlikTableName, pLoadQVD_LoadMode)
 	pLoadQVD_LoadMode=;
 EndSub;
 /*
+	Calculates diff in months beetween two monthes formated as YYYYMM numbers
+
+    Parameters:
+     - @$1 - month #1
+	 - @$2 - month #2
+
+	Usage sample:
+		Let sNoOfMonthes = $(MonthDiff(202301, 202201));
+*/
+Set MonthDiff = (Div($1 - $2, 100)) * 12 + (Mod(Mod($1 - $2, 100), 88));/*
 	Compares time of origin and destination files and returns True()
 	if origin one is newer, otherwise returns False()
 
@@ -523,6 +660,9 @@ EndSub;
 */
 Set NewerFile = if(Alt(FileTime('$1'), 0) * 1000000000 > Alt(FileTime('$2'), 0) * 1000000000, True(), False());
 /*
+	2023-08-28 - added sQLibTimer and sQLibGlobalTimer for time diff output
+	2023-09-20 - added sQVDPathPrefix for getting app's version
+	
 	Clean up QLib variables
 
 	Usage sample:
@@ -531,6 +671,17 @@ Set NewerFile = if(Alt(FileTime('$1'), 0) * 1000000000 > Alt(FileTime('$2'), 0) 
 Sub QLibCleanUp
 	FileExists=;
 	NewerFile=;
+	MonthDiff=;
+	vCronMinute=;
+	vCronHour=;
+	vCronDay=;
+	vCronMonth=;
+	vCronYear=;
+	vCronWeekDay=;
+	sQLibTimer=;
+	sQLibGlobalTimer=;
+	sQLibTimeDiffFormat=;
+	sQVDPathPrefix=;
 EndSub;
 /*
 	RunDataLoader procedure initiates massive data loading according to settings
@@ -554,10 +705,8 @@ EndSub;
 // 2022-09-29: ToDo:
 // - проверка периодов по Cron, пока только точное время
 // - поддержка inctemental loading
-// - поддержка сохранения загруженной таблицы по периодам их поля LoadAndStoreField
-// - поддержка Full loading по дате sFullExtract_StartDate
+// - поддержка сохранения загруженной таблицы по периодам из поля LoadAndStoreField
 // - поддержка REST и web
-// - поддержка ?FieldReduction
 
 Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 	if IsNull(sRunDataLoader_Queue) then
@@ -607,7 +756,7 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 	
 	Call DropTables('Variables');
 
-	// Default variable settings, in case there are nothing is provide in the config. file
+	// Default variable settings, in case there is nothing provided in the config. file
 	If '' = sFullExtract_StartDate then
 		// Load last two years in 'Full loading mode' by default
 		Let sFullExtract_StartDate = floor(AddMonths(Today(), -12));
@@ -677,21 +826,77 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
             
             For sRunDataLoader_Table = 0 to NoOfRows('Tables') - 1
             	Let sRunDataLoader_TableName = Trim(Peek('Table Name', sRunDataLoader_Table, 'Tables'));
+				Let sRunDataLoader_QVDName_tmp = Trim(Peek('QVD Name', sRunDataLoader_Table, 'Tables'));
                 Let sRunDataLoader_StoreInSubFolder = Peek('?StoreInSubFolder', sRunDataLoader_Table, 'Tables');
 				Let sRunDataLoader_Cron = Upper(Peek('Cron', sRunDataLoader_Table, 'Tables'));
                 Let sRunDataLoader_LoadMode = Upper(Peek('LoadMode', sRunDataLoader_Table, 'Tables'));
                 Let sRunDataLoader_WhereIncremental = Upper(Peek('WhereIncremental', sRunDataLoader_Table, 'Tables'));
                 Let sRunDataLoader_StoringMode = Upper(Peek('StoringMode', sRunDataLoader_Table, 'Tables'));
                 Let sRunDataLoader_LoadAndStoreField = Upper(Peek('LoadAndStoreField', sRunDataLoader_Table, 'Tables'));
+				Let sRunDataLoader_FieldReduction = Upper(Peek('?FieldReduction', sRunDataLoader_Table, 'Tables'));
+				Let sRunDataLoader_Where = Peek('Where', sRunDataLoader_Table, 'Tables');
 				Let sRunDataLoader_Select = Upper(Peek('Select', sRunDataLoader_Table, 'Tables'));
-                
+
                 // Задать имя выходного файла
                 Let sRunDataLoader_QVDName = '$(sRunDataLoader_SourceFolder)/$(sRunDataLoader_SchemeName)/';
 				
 				// Взять имя QVD, если оно есть, если нет, то приравнять к имени таблицы
-				Let sRunDataLoader_QVDName_tmp = Trim(Peek('QVD Name', sRunDataLoader_Table, 'Tables'));
 				if Len(sRunDataLoader_QVDName_tmp) <= 0 then
 					sRunDataLoader_QVDName_tmp = sRunDataLoader_TableName;
+				EndIf
+				;
+				
+				// Сформировать выражение для LOAD и SELECT со списком полей или "*"
+				Let sRunDataLoader_LoadFieldList = '';
+				Let sRunDataLoader_SelectFieldList = '';
+				
+				if Len(sRunDataLoader_FieldReduction) > 0 then
+					FieldList:
+					Load
+						Replace(OriginalFieldName, '"', '') as OriginalFieldName
+						, Replace(NewFieldName, '"', '') as NewFieldName
+					FROM [$(sRunDataLoader_ConfigFileName)] (ooxml, embedded labels, table is [$(sRunDataLoader_FieldReduction)])
+					Where
+						?Active = 1
+					;
+					
+					If NoOfRows('FieldList') > 0 then
+						For sRunDataLoader_FieldIndex = 0 to NoOfRows('FieldList') - 1
+							Let sRunDataLoader_OriginalFieldName = Peek('OriginalFieldName', sRunDataLoader_FieldIndex, 'FieldList');
+							Let sRunDataLoader_NewFieldName = Peek('NewFieldName', sRunDataLoader_FieldIndex, 'FieldList');
+
+							if Len(sRunDataLoader_LoadFieldList) > 0 then
+								Let sRunDataLoader_LoadFieldList = sRunDataLoader_LoadFieldList & chr(10) & ', ';
+							EndIf
+							;
+
+							if Len(sRunDataLoader_SelectFieldList) > 0 then
+								Let sRunDataLoader_SelectFieldList = sRunDataLoader_SelectFieldList & chr(10) & ', ';
+							EndIf
+							;
+							
+							if Len(sRunDataLoader_OriginalFieldName) > 0 then
+								Let sRunDataLoader_LoadFieldList = sRunDataLoader_LoadFieldList & '"$(sRunDataLoader_OriginalFieldName)"';
+								if Len(sRunDataLoader_NewFieldName) > 0 then
+									Let sRunDataLoader_LoadFieldList = sRunDataLoader_LoadFieldList & ' as "$(sRunDataLoader_NewFieldName)"';
+								EndIf
+								;
+								Let sRunDataLoader_SelectFieldList = sRunDataLoader_SelectFieldList & '"$(sRunDataLoader_OriginalFieldName)"';
+							EndIf
+							;
+
+						Next sRunDataLoader_FieldIndex
+						;
+					Else
+						Let sRunDataLoader_LoadFieldList = '*';
+						Let sRunDataLoader_SelectFieldList = '*';						
+					EndIf
+					;
+
+					Call DropTables('FieldList');
+				Else
+					Let sRunDataLoader_LoadFieldList = '*';
+					Let sRunDataLoader_SelectFieldList = '*';
 				EndIf
 				;
 				
@@ -733,7 +938,7 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 					// Trace FileName: $(sRunDataLoader_QVDName_tmp) | FileTime: $(sRunDataLoader_FileTime) | MDay: $(sRunDataLoader_CronMDay) | WDay: $(sRunDataLoader_CronWDay);
 				EndIf
 				;
-				
+			
 				// Проверить условия по Cron, если (а) оно задано и файла нет ИЛИ (б) оно не задано ИЛИ (в) время дня месяца ИЛИ (в) дня недели по Corn больше времени файла
 				if (Len(sRunDataLoader_Cron) > 0 and Len(sRunDataLoader_FileTime) = 0) or (Len(sRunDataLoader_Cron) = 0) or (sRunDataLoader_CronMDay > 0 and sRunDataLoader_CronMDay > sRunDataLoader_FileTime) or (sRunDataLoader_CronWDay > 0 and sRunDataLoader_CronWDay > sRunDataLoader_FileTime) then
 					Trace Initiate data loading...;
@@ -743,7 +948,7 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 					If ('F' = sRunDataLoader_LoadMode) then
 						// Сохранение полной таблицы
 						If 'F' = sRunDataLoader_StoringMode then
-							Let sRunDataLoader_Where = Peek('Where', sRunDataLoader_Table, 'Tables');
+							
 							if Len(sRunDataLoader_Where) > 0 then
 								Let sRunDataLoader_Where = 'WHERE $(sRunDataLoader_Where)';
 							Else
@@ -754,8 +959,11 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 							Trace Loading and storing $(sRunDataLoader_QVDName)...;
 							TableData:
 			//                 Load Null() as F AutoGenerate 1; // DBG
+							Load
+								$(sRunDataLoader_LoadFieldList)
+							;
 							SQL Select
-								*
+								$(sRunDataLoader_SelectFieldList)
 			//                     count(*)
 							From
 								$(vRunDataLoader_From)
@@ -769,12 +977,12 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 						ElseIf Len(sRunDataLoader_LoadAndStoreField) > 0 then
 							Trace TBD >> Storing loaded table per periods...;
 						ElseIf Len(sRunDataLoader_StoringMode) = 0 then
-							Trace There is no loading & storing mode provided in the "LoadAndStoreField" attribute for the table  "$(sRunDataLoader_TableName)";
+							Trace There is no loading & storing mode provided in the "StoringMode" attribute for the table  "$(sRunDataLoader_TableName)";
 						Else
 							Trace To store the table "$(sRunDataLoader_TableName)" in the "$(sRunDataLoader_StoringMode)" mode you need set the "LoadAndStoreField" attribute;
 						End If
 						;
-					// Partial loading stating from 
+					// Partial loading stating from
 					ElseIf 'P' = sRunDataLoader_LoadMode then
 						If (Len(sRunDataLoader_LoadAndStoreField)) > 0 and (Len(sRunDataLoader_WhereIncremental) > 0) then
 							// Пока загрузка только помесячная
@@ -822,8 +1030,11 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 								Trace Loading and storing $(sRunDataLoader_QVDName_Final)...;
 								TableData:
 				//                 Load Null() as F AutoGenerate 1; // DBG
+								Load
+									$(sRunDataLoader_LoadFieldList)
+								;
 								SQL Select
-									*
+									$(sRunDataLoader_SelectFieldList)
 				//                     count(*)
 								From
 									$(vRunDataLoader_From)
@@ -843,7 +1054,7 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 								EndIf
 							Loop
 						Else
-							Trace To load in the "$(sRunDataLoader_LoadMode)" mode you need to provide conditions in the "WhereIncremental" attribute and filed name in the "LoadAndStoreField" attribute;
+							Trace To load in the "$(sRunDataLoader_LoadMode)" mode you need to provide conditions in the "WhereIncremental" attribute and field name in the "LoadAndStoreField" attribute;
 						End If
 						;
 					ElseIf 'I' = sRunDataLoader_LoadMode then
@@ -904,7 +1115,56 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 	sRunDataLoader_FileTime=;
 	sRunDataLoader_Queue=;
 	vRunDataLoader_From=;
+	sRunDataLoader_FieldReduction=;
+	sRunDataLoader_LoadFieldList=;
+	sRunDataLoader_SelectFieldList=;
+	sRunDataLoader_FieldIndex=;
+	sRunDataLoader_OriginalFieldName=;
+	sRunDataLoader_NewFieldName=;
 EndSub
+;/*
+	Shows table field list with separator
+
+    Parameters:
+     - @pShowFields_TableName - table name
+
+	Usage sample:
+		 Call ShowFields('MyFavoriteInMemoryTable');
+*/
+Sub ShowFields(pShowFields_TableName)
+	if not IsNull(pShowFields_TableName) then
+		Let sShowFields_FieldCnt = NoOfFields('$(pShowFields_TableName)');
+        Let sShowFields_FieldName = '';
+        if sShowFields_FieldCnt > 0 then
+        	for sShowFields_FieldIndex = 1 to sShowFields_FieldCnt
+            	if Len(sShowFields_FieldName) > 0 then
+                	Let sShowFields_FieldName = sShowFields_FieldName & '|';
+                EndIf
+                ;
+            	Let sShowFields_FieldName = sShowFields_FieldName & FieldName(sShowFields_FieldIndex, '$(pShowFields_TableName)');
+             Next sShowFields_FieldIndex
+            ;
+            if Len(sShowFields_FieldName) > 0 then
+            	Let sShowFields_FieldName = '[ShowFields]: Found field list in [$(pShowFields_TableName)] {'
+                							& chr(10) & sShowFields_FieldName & chr(10) & '}';
+                Trace $(sShowFields_FieldName);
+            Else
+            	Trace [ShowFields]: No fields found in [$(pShowFields_TableName)];
+            EndIf
+            ;
+        Else
+        	Trace [ShowFields]: no fields found for the [$(pShowFields_TableName)] table;
+        EndIf
+        ;
+    Else
+    	Trace [ShowFields]: no table name is specified.;
+    End If
+    ;
+    pShowFields_TableName=;
+    sShowFields_FieldCnt=;
+    sShowFields_FieldIndex=;
+    sShowFields_FieldName=;
+End Sub
 ;/*
 	Shows nubmer of rows in the table
 
@@ -941,6 +1201,43 @@ Sub ShowNoOfRows(pShowNoOfRows_TableNames, pShowNoOfRows_Comment)
     pShowNoOfRows_TableName=;
 	pShowNoOfRows_Comment=;
 End Sub;/*
+	Shows table list
+
+    Parameters:
+     - none
+
+	Usage sample:
+		 Call ShowTables;
+*/
+Sub ShowTables
+
+	Let sShowTables_TableName = '';
+    Let sShowTables_NoOfTables = NoOfTables();
+    
+    if sShowTables_NoOfTables > 0 then
+    
+        for sShowTables_Tables = 0 to sShowTables_NoOfTables - 1
+        
+        	if Len(sShowTables_TableName) > 0 then
+            	Let sShowTables_TableName = sShowTables_TableName & ', ';
+            EndIf
+            ;
+            Let sShowTables_TableName = sShowTables_TableName & TableName(sShowTables_Tables);
+
+        Next sShowTables_Tables
+        ;
+        
+        Trace [ShowTables]: $(sShowTables_TableName);
+    Else
+    	Trace [ShowTables]: No tables found.;
+    EndIf
+    ;
+
+    sShowTables_Tables=;
+    sShowTables_TableName=;
+    sShowTables_NoOfTables=;
+EndSub
+;/*
 	Stores Qlik table $(pStoreQVD_QlikTableName) as QVD-file $(pStoreQVD_FileName).
 
     Parameters:
@@ -948,8 +1245,8 @@ End Sub;/*
      - @pStoreQVD_FileName - file full path
 	 - @pStoreQVD_NoDrop - flag for drop operation, it's True() by default,
                            otherwise it's False()
-	 - @pStoreQVD_ZeroRowStore - flag for zero row tables, it's True() by
-                                 default, otherwise it's False()
+	 - @pStoreQVD_ZeroRowStore - flag for zero row tables, it's False() by
+                                 default, otherwise it's True()
 
 	Usage sample:
 		Call StoreQVD('tmpData', '$(sDestinationFile)');
@@ -958,21 +1255,23 @@ Sub StoreQVD(pStoreQVD_QlikTableName, pStoreQVD_FileName, pStoreQVD_NoDrop, pSto
 
 	// Store zero row tables by default, but check pStoreQVD_ZeroRowStore
 	if IsNull(pStoreQVD_ZeroRowStore) then
-		pStoreQVD_ZeroRowStore = True()
-	ElseIf pStoreQVD_ZeroRowStore <> True() Then
-		pStoreQVD_ZeroRowStore = False()
+		pStoreQVD_ZeroRowStore = False();
+	ElseIf pStoreQVD_ZeroRowStore <> False() Then
+		pStoreQVD_ZeroRowStore = True();
 	End If
+    ;
 
 	// Check whether table exists and should the empty table be stored
-	if TableNumber('$(pStoreQVD_QlikTableName)')>=0
+	if TableNumber('$(pStoreQVD_QlikTableName)')>=0 then
 
 		if(pStoreQVD_ZeroRowStore or NoOfRows('$(pStoreQVD_QlikTableName)') > 0) then
 			// Drop tables by default, but check the pStoreQVD_NoDrop
 			if IsNull(pStoreQVD_NoDrop) then
-				pStoreQVD_NoDrop = True()
+				pStoreQVD_NoDrop = True();
 			ElseIf pStoreQVD_NoDrop <> True() Then
-				pStoreQVD_NoDrop = False()
+				pStoreQVD_NoDrop = False();
 			End If
+			;
 
 			if $(FileExists($(pStoreQVD_FileName))) then
 				Trace [StoreQVD] Rewriting: $(pStoreQVD_FileName);
@@ -981,28 +1280,33 @@ Sub StoreQVD(pStoreQVD_QlikTableName, pStoreQVD_FileName, pStoreQVD_NoDrop, pSto
 			End If
 
 			Store [$(pStoreQVD_QlikTableName)] into [$(pStoreQVD_FileName)] (qvd);
+		Else
+			Trace [StoreQVD] Warning: $(pStoreQVD_FileName) is empty and not stored, please use the 4th True/False argument.;
 		End If
+        ;
 
 		// Drop if needed
 		if pStoreQVD_NoDrop then
 			Drop Table [$(pStoreQVD_QlikTableName)];
 		End If
+		;
 
 	End If
+	;
 	
     pStoreQVD_QlikTableName=;
   	pStoreQVD_FileName=;
 	pStoreQVD_NoDrop=;
 	pStoreQVD_ZeroRowStore=;
-EndSub;
-/*
+EndSub
+;/*
 	Stores Qlik table $(pStoreTable_QlikTableName) as a file $(pStoreTable_FileName)
 	with the specified format $(pStoreTable_FileFormat) which is either qvd or txt.
 
     Parameters:
      - @pStoreTable_QlikTableName - Qlik table name
      - @pStoreTable_FileName - file full path
-	 - @pStoreTable_FileFormat - file format
+	 - @pStoreTable_FileFormat - file format, it's 'qvd' by default
 	 - @pStoreTable_NoDrop - flag for drop operation, it's True() by default,
                            otherwise it's False()
 	 - @pStoreTable_ZeroRowStore - flag for zero row tables, it's True() by
@@ -1056,6 +1360,8 @@ Sub StoreTable(pStoreTable_QlikTableName, pStoreTable_FileName, pStoreTable_File
 	pStoreTable_ZeroRowStore=;
 EndSub;
 /*
+	2023-08-28 - added sQLibTimer and sQLibGlobalTimerfor time diff output
+	
 	Traces message in the frame with indent
 
     Parameters:
@@ -1070,26 +1376,47 @@ Sub Trace(pTrace_msg, pTrace_Indent, pTrace_FrameSign)
 	// Space sign for Trace
 	Let sTrace_Space = chr(847);
     
-    if Alt(pTrace_Indent, 0) = 0 then
+    if Len(pTrace_Indent) = 0 then
     	Let pTrace_Indent = Repeat(' ', 4);
     Else
     	Let pTrace_Indent = Repeat(' ', Num(pTrace_Indent));
     EndIf
-
+	;
+	
     if IsNull(pTrace_FrameSign) or Len(pTrace_FrameSign) > 1 then
     	Let pTrace_FrameSign = Repeat('*', 50);
     Else
     	Let pTrace_FrameSign = Repeat(pTrace_FrameSign, 50);
     EndIf
-
+	;
+	
+	// Check and set time diff variables
+	Let sTrace_TimeDiff = '';
+	// If timer is started...
+	if Len(sQLibTimer) > 0 then
+		// Initializa global timer start variable
+		if Len(sQLibGlobalTimer) = 0 then
+			Let sQLibGlobalTimer = sQLibTimer;
+		endif
+		;
+		// Set time diff string
+		Let sTrace_TimeDiff = ' (' & Interval(Now() - sQLibTimer, '$(sQLibTimeDiffFormat)') &
+							  ' / ' & Interval(Now() - sQLibGlobalTimer, '$(sQLibTimeDiffFormat)') & ')';
+		
+		// Restart local timer
+		Let sQLibTimer = Now();
+	endif
+	;
+	
     Trace $(sTrace_Space)
 $(pTrace_Indent)$(pTrace_FrameSign)
-$(pTrace_Indent)$(pTrace_msg)
+$(pTrace_Indent)$(pTrace_msg)$(sTrace_TimeDiff)
 $(pTrace_Indent)$(pTrace_FrameSign);
 	pTrace_msg=;
 	sTrace_Space=;
     pTrace_Indent=;
     pTrace_FrameSign=;
+	sTrace_TimeDiff=;
 End Sub;
 /*
 	Returns Qlik server name basing on the ComputerName() value
@@ -1103,4 +1430,4 @@ End Sub;
 		  the publisher server and in the script editor
 */
 
-Set vQlikServerURL = Pick(Match(ComputerName(), 'MSC01-SAS27T', 'MSC199-SAS27', 'MSC01-SAS25', 'MSC01-SAS38', 'MSC01-SAS40', 'MSC01-SAS60'), 'qsd.pgk.ru', 'qsp.pgk.ru', 'bi.pgk.ru', 'bi.pgk.ru', 'bi.pgk.ru/self', 'bi.pgk.ru/dev');
+Set vQlikServerURL = Pick(Match(ComputerName(), 'LOCALHOST'), 'BI.YOU.DOMAIN');
