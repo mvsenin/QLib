@@ -49,13 +49,15 @@ QLib functional scripting library implements the following functionality:
 ### DropTable(pDropTable_TableNames) method
 
 	Description:
-		Drops tables, if they exist
+		Drops tables, if they exist.
+  		Both DropTable() and DropTables() are allowed.
 	
 	Parameters:
 		- @pDropTable_TableNames - list of Qlik table names delimited with comma
 	
-	Usage sample:
-		Call DropTable('MyTable');
+	Usage samples:
+		Call DropTable('MyTable1,MyTable3');
+  		Call DropTables('MyTable4,MyTable2');
    
 ### StoreTable() method
 
