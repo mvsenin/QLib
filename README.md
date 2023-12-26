@@ -56,39 +56,6 @@ QLib functional scripting library implements the following functionality:
 	
 	Usage sample:
 		Call DropTable('MyTable');
-
-### ListTables() method
-
-	Description:
-		ListTables procedure lists all the existing table names and indeces via Trace
-
-	Parameters:
-		- none
-
-	Usage sample:
-		Call ListTables;
-
-### ShowFields() method
-
-	Description:
-		Shows table field list with separator
-
-	Parameters:
-		- @pShowFields_TableName - table name
-
-	Usage sample:
-		Call ShowFields('MyFavoriteInMemoryTable');
-  
-### ShowTables() method
-
-	Description:
-		Shows table list, delimited by comma
-
-	Parameters:
-		- none
-
-	Usage sample:
-		 Call ShowTables;
    
 ### StoreTable() method
 
@@ -187,6 +154,28 @@ QLib functional scripting library implements the following functionality:
 
 ## Logging
 
+### ListTables() method
+
+	Description:
+		ListTables procedure lists all the existing table names and indeces via Trace
+
+	Parameters:
+		- none
+
+	Usage sample:
+		Call ListTables;
+
+### ShowFields() method
+
+	Description:
+		Shows table field list with separator
+
+	Parameters:
+		- @pShowFields_TableName - table name
+
+	Usage sample:
+		Call ShowFields('MyFavoriteInMemoryTable');
+
 ### ShowNoOfRows(pShowNoOfRows_TableNames, pShowNoOfRows_Comment) method
 
 	Desription:
@@ -198,6 +187,17 @@ QLib functional scripting library implements the following functionality:
 	
 	Usage sample:
 		Call ShowNoOfRows('tmpData');
+
+### ShowTables() method
+
+	Description:
+		Shows table list, delimited by comma
+
+	Parameters:
+		- none
+
+	Usage sample:
+		 Call ShowTables;
 
 ### Trace(pTrace_msg, pTrace_Indent, pTrace_FrameSign) method
 
