@@ -78,12 +78,14 @@ Sub CapitalizeStr(pCapitalizeStr_StrVarName, pCapitalizeStr_Mode)
 EndSub
 ;/*
 	2023-09-20
-	
-	CopyFile copies source file to destination one
+
+	Description:
+		CopyFile copies source file to destination one
+
 	Parameters:
 		@pCopyFile_SourceFile - source file name with full path
 		@pCopyFile_DestinationFile - destination file name with full path
-	 
+
 	Usage sample:
 		Call CopyFile('$(sSourceFile)', '$(sDestinationFile)');
 */
@@ -95,6 +97,7 @@ Sub CopyFile(pCopyFile_SourceFile, pCopyFile_DestinationFile)
             Trace Copying [$(pCopyFile_SourceFile)] to [$(pCopyFile_DestinationFile)]...;
             
         	CopyFile_SourceFile:
+			NoConcatenate
             Load * From [$(pCopyFile_SourceFile)] (qvd);
 
             Call StoreTable('CopyFile_SourceFile', '$(pCopyFile_DestinationFile)');
@@ -354,11 +357,13 @@ Set vCronWDay = Timestamp(Timestamp#(
                 if(SubField('$1', ' ', 4) = '*', vCronMonth, SubField('$1', ' ', 4)) & ' ? ' &
                 vCronYear
                 ,'mm hh DD M ? YYYY'));/*
-	Drops fields from the table
+	Description:
+		Drops fields from the table
 
-    Parameters:
-     - @pDropFields_FldList - list of field names delimited with comma
-	 - @pDropFields_Table - table name to remove fields from
+	Parameters:
+		- @pDropFields_FldList - list of field names delimited with comma
+		- @pDropFields_Table - table name to remove fields from
+
 	Usage sample:
 		Call DropFields('ZZ, AB', 'MyTable');
 */
@@ -550,7 +555,13 @@ Sub GenerateColorVariables(sGenerateColorVariables_Mode, sGenerateColorVariables
 	sGenerateColorVariables_CleanupData=;
 EndSub
 ;/*
-	ListTables procedure lists all the existing table names vie Trace
+
+	Description:
+		ListTables procedure lists all the existing table names and indeces via Trace
+
+	Usage sample:
+		Call ListTables;
+
 */
 Sub ListTables
     For sListTables_I = 0 to NoOfTables() - 1
@@ -1123,13 +1134,14 @@ Sub RunDataLoader(sRunDataLoader_SourceFolder, sRunDataLoader_Queue)
 	sRunDataLoader_NewFieldName=;
 EndSub
 ;/*
-	Shows table field list with separator
+	Description:
+		Shows table field list with separator
 
-    Parameters:
-     - @pShowFields_TableName - table name
+	Parameters:
+		- @pShowFields_TableName - table name
 
 	Usage sample:
-		 Call ShowFields('MyFavoriteInMemoryTable');
+		Call ShowFields('MyFavoriteInMemoryTable');
 */
 Sub ShowFields(pShowFields_TableName)
 	if not IsNull(pShowFields_TableName) then
@@ -1201,10 +1213,11 @@ Sub ShowNoOfRows(pShowNoOfRows_TableNames, pShowNoOfRows_Comment)
     pShowNoOfRows_TableName=;
 	pShowNoOfRows_Comment=;
 End Sub;/*
-	Shows table list
+	Description:
+		Shows table list, delimited by comma
 
-    Parameters:
-     - none
+	Parameters:
+		- none
 
 	Usage sample:
 		 Call ShowTables;
@@ -1300,17 +1313,18 @@ Sub StoreQVD(pStoreQVD_QlikTableName, pStoreQVD_FileName, pStoreQVD_NoDrop, pSto
 	pStoreQVD_ZeroRowStore=;
 EndSub
 ;/*
-	Stores Qlik table $(pStoreTable_QlikTableName) as a file $(pStoreTable_FileName)
-	with the specified format $(pStoreTable_FileFormat) which is either qvd or txt.
+	Description:
+		Stores Qlik table $(pStoreTable_QlikTableName) as a file $(pStoreTable_FileName)
+		with the specified format $(pStoreTable_FileFormat) which is either qvd or txt.
 
-    Parameters:
-     - @pStoreTable_QlikTableName - Qlik table name
-     - @pStoreTable_FileName - file full path
-	 - @pStoreTable_FileFormat - file format, it's 'qvd' by default
-	 - @pStoreTable_NoDrop - flag for drop operation, it's True() by default,
-                           otherwise it's False()
-	 - @pStoreTable_ZeroRowStore - flag for zero row tables, it's True() by
-                                 default, otherwise it's False()
+	Parameters:
+		- @pStoreTable_QlikTableName - Qlik table name
+		- @pStoreTable_FileName - file full path
+		- @pStoreTable_FileFormat - file format, it's 'qvd' by default
+		- @pStoreTable_NoDrop - flag for drop operation, it's True() by default,
+								otherwise it's False()
+		- @pStoreTable_ZeroRowStore - flag for zero row tables, it's True() by
+								default, otherwise it's False()
 
 	Usage sample:
 		Call StoreTable('tmpData', '$(sDestinationFile)', 'txt');

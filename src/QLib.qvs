@@ -1,4 +1,4 @@
-Let QLibBasePath = 'lib://<HERE_YOUR_FOLDER>';
+Let QLibBasePath = 'lib://QLib'; // To Be Turned
 
 // 2023-08-28 - time diff format for output via the Trace() sub
 Let sQLibTimeDiffFormat = 'mm:ss';
@@ -8,9 +8,9 @@ Let sQLibDocumentTitle = DocumentTitle();
 
 // Environment specific settings:
 // - It's assumed that the app name (title) contains the QLibAppVesionMarker with the following number
-Let QLibAppVesionMarker = ' TCO-';
+Let QLibAppVesionMarker = ' PRJ-'; // To Be Turned
 // - the root path by default
-Let sQVDPathPrefix = '/TCO';
+Let sQVDPathPrefix = '/PRJ'; // To Be Turned
 
 if sQLibDocumentTitle like '*$(QLibAppVesionMarker)*' then
 	Let sQVDPathPrefix = KeepChar(SubField(sQLibDocumentTitle, '$(QLibAppVesionMarker)', 2), '0123456789');

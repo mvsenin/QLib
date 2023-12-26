@@ -1,5 +1,11 @@
 /*
-	ListTables procedure lists all the existing table names vie Trace
+
+	Description:
+		ListTables procedure lists all the existing table names and indeces via Trace
+
+	Usage sample:
+		Call ListTables;
+
 */
 Sub ListTables
     For sListTables_I = 0 to NoOfTables() - 1

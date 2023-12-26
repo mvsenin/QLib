@@ -1,11 +1,12 @@
 /*
-	Shows table field list with separator
+	Description:
+		Shows table field list with separator
 
-    Parameters:
-     - @pShowFields_TableName - table name
+	Parameters:
+		- @pShowFields_TableName - table name
 
 	Usage sample:
-		 Call ShowFields('MyFavoriteInMemoryTable');
+		Call ShowFields('MyFavoriteInMemoryTable');
 */
 Sub ShowFields(pShowFields_TableName)
 	if not IsNull(pShowFields_TableName) then

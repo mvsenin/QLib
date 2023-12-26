@@ -1,11 +1,13 @@
 /*
 	2023-09-20
-	
-	CopyFile copies source file to destination one
+
+	Description:
+		CopyFile copies source file to destination one
+
 	Parameters:
 		@pCopyFile_SourceFile - source file name with full path
 		@pCopyFile_DestinationFile - destination file name with full path
-	 
+
 	Usage sample:
 		Call CopyFile('$(sSourceFile)', '$(sDestinationFile)');
 */
@@ -17,6 +19,7 @@ Sub CopyFile(pCopyFile_SourceFile, pCopyFile_DestinationFile)
             Trace Copying [$(pCopyFile_SourceFile)] to [$(pCopyFile_DestinationFile)]...;
             
         	CopyFile_SourceFile:
+			NoConcatenate
             Load * From [$(pCopyFile_SourceFile)] (qvd);
 
             Call StoreTable('CopyFile_SourceFile', '$(pCopyFile_DestinationFile)');

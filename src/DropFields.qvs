@@ -1,9 +1,11 @@
 /*
-	Drops fields from the table
+	Description:
+		Drops fields from the table
 
-    Parameters:
-     - @pDropFields_FldList - list of field names delimited with comma
-	 - @pDropFields_Table - table name to remove fields from
+	Parameters:
+		- @pDropFields_FldList - list of field names delimited with comma
+		- @pDropFields_Table - table name to remove fields from
+
 	Usage sample:
 		Call DropFields('ZZ, AB', 'MyTable');
 */

@@ -1,15 +1,16 @@
 /*
-	Stores Qlik table $(pStoreTable_QlikTableName) as a file $(pStoreTable_FileName)
-	with the specified format $(pStoreTable_FileFormat) which is either qvd or txt.
+	Description:
+		Stores Qlik table $(pStoreTable_QlikTableName) as a file $(pStoreTable_FileName)
+		with the specified format $(pStoreTable_FileFormat) which is either qvd or txt.
 
-    Parameters:
-     - @pStoreTable_QlikTableName - Qlik table name
-     - @pStoreTable_FileName - file full path
-	 - @pStoreTable_FileFormat - file format, it's 'qvd' by default
-	 - @pStoreTable_NoDrop - flag for drop operation, it's True() by default,
-                           otherwise it's False()
-	 - @pStoreTable_ZeroRowStore - flag for zero row tables, it's True() by
-                                 default, otherwise it's False()
+	Parameters:
+		- @pStoreTable_QlikTableName - Qlik table name
+		- @pStoreTable_FileName - file full path
+		- @pStoreTable_FileFormat - file format, it's 'qvd' by default
+		- @pStoreTable_NoDrop - flag for drop operation, it's True() by default,
+								otherwise it's False()
+		- @pStoreTable_ZeroRowStore - flag for zero row tables, it's True() by
+								default, otherwise it's False()
 
 	Usage sample:
 		Call StoreTable('tmpData', '$(sDestinationFile)', 'txt');

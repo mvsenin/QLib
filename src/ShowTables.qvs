@@ -1,8 +1,9 @@
 /*
-	Shows table list
+	Description:
+		Shows table list, delimited by comma
 
-    Parameters:
-     - none
+	Parameters:
+		- none
 
 	Usage sample:
 		 Call ShowTables;
