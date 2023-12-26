@@ -16,7 +16,7 @@ QLib functional scripting library implements the following functionality:
 2. QLib.qvs - includes all Qlib scripts
 3. QLibFull.qvs - full text of QLib
 
-# Main function description
+# Main functionality description
 
 ## Data Profiling
 
