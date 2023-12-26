@@ -13,7 +13,7 @@ QLib functional scripting library implements the following functionality:
 
 # Special files
 1. make.bat - generates QLibFull.qvs with full text of the library
-2. QLib.qvs - includes all Qlib scripts
+2. QLib.qvs - includes all Qlib scripts, please not the sQVDPathPrefix variable which allows implemeting versioning of the apps and dev/test/prod environments
 3. QLibFull.qvs - full text of QLib
 
 # Main functionality description
